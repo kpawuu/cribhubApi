@@ -4,7 +4,7 @@
   "public": "./public/",
   "origins": ["http://localhost:3000", "http://localhost:3036"],
   "paginate": {
-    "default": 25,
+    "default": 20,
     "max": 100
   },
   "mongodb": "mongodb://root:twoHkq7jzFWoQwp5HG3nbsP4HZfLCL5GJBu8jblI1pb1MxoKnADk5QtrkacUB5yj@wgswgo4skgs40gs4wc0kog4o:27017/?directConnection=true",
