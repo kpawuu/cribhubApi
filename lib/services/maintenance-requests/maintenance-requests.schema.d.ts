@@ -30,10 +30,10 @@ export declare const maintenanceRequestResolver: import("@feathersjs/schema").Re
     _id: string | {};
     createdAt: string;
     description: string;
+    category: string;
     title: string;
     tenantId: string;
     unitId: string;
-    category: string;
 }, HookContext<MaintenanceRequestsService<import("./maintenance-requests.class").MaintenanceRequestsParams>>>;
 export declare const maintenanceRequestExternalResolver: import("@feathersjs/schema").Resolver<{
     updatedAt?: string | undefined;
@@ -46,10 +46,10 @@ export declare const maintenanceRequestExternalResolver: import("@feathersjs/sch
     _id: string | {};
     createdAt: string;
     description: string;
+    category: string;
     title: string;
     tenantId: string;
     unitId: string;
-    category: string;
 }, HookContext<MaintenanceRequestsService<import("./maintenance-requests.class").MaintenanceRequestsParams>>>;
 export declare const maintenanceRequestDataSchema: import("@feathersjs/typebox").TObject<{
     unitId: import("@feathersjs/typebox").TString<string>;
@@ -72,10 +72,10 @@ export declare const maintenanceRequestDataResolver: import("@feathersjs/schema"
     _id: string | {};
     createdAt: string;
     description: string;
+    category: string;
     title: string;
     tenantId: string;
     unitId: string;
-    category: string;
 }, HookContext<MaintenanceRequestsService<import("./maintenance-requests.class").MaintenanceRequestsParams>>>;
 export declare const maintenanceRequestPatchSchema: import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TObject<{
     status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"in_progress">, import("@feathersjs/typebox").TLiteral<"completed">]>>;
@@ -96,10 +96,10 @@ export declare const maintenanceRequestPatchResolver: import("@feathersjs/schema
     _id: string | {};
     createdAt: string;
     description: string;
+    category: string;
     title: string;
     tenantId: string;
     unitId: string;
-    category: string;
 }, HookContext<MaintenanceRequestsService<import("./maintenance-requests.class").MaintenanceRequestsParams>>>;
 export declare const maintenanceRequestQueryProperties: import("@feathersjs/typebox").TPick<import("@feathersjs/typebox").TObject<{
     _id: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;

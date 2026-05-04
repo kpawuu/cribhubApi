@@ -16,6 +16,7 @@ export declare const rentalContractSchema: import("@feathersjs/typebox").TObject
     endDate: import("@feathersjs/typebox").TString<string>;
     monthlyRent: import("@feathersjs/typebox").TNumber;
     rentCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    lastPaidAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
 }>;
@@ -30,6 +31,7 @@ export declare const rentalContractResolver: import("@feathersjs/schema").Resolv
     documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
+    lastPaidAt?: string | undefined;
     _id: string | {};
     createdAt: string;
     landlordId: string;
@@ -48,6 +50,7 @@ export declare const rentalContractExternalResolver: import("@feathersjs/schema"
     documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
+    lastPaidAt?: string | undefined;
     _id: string | {};
     createdAt: string;
     landlordId: string;
@@ -81,6 +84,7 @@ export declare const rentalContractDataResolver: import("@feathersjs/schema").Re
     documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
+    lastPaidAt?: string | undefined;
     _id: string | {};
     createdAt: string;
     landlordId: string;
@@ -105,6 +109,7 @@ export declare const rentalContractPatchSchema: import("@feathersjs/typebox").TP
     endDate: import("@feathersjs/typebox").TString<string>;
     monthlyRent: import("@feathersjs/typebox").TNumber;
     rentCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    lastPaidAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
 }>, ["_id", "unitId", "landlordId", "tenantId", "createdAt"]>>;
@@ -119,6 +124,7 @@ export declare const rentalContractPatchResolver: import("@feathersjs/schema").R
     documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
+    lastPaidAt?: string | undefined;
     _id: string | {};
     createdAt: string;
     landlordId: string;
@@ -143,6 +149,7 @@ export declare const rentalContractQueryProperties: import("@feathersjs/typebox"
     endDate: import("@feathersjs/typebox").TString<string>;
     monthlyRent: import("@feathersjs/typebox").TNumber;
     rentCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    lastPaidAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
 }>, ["_id", "unitId", "landlordId", "tenantId", "status", "createdAt", "updatedAt"]>;

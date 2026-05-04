@@ -66,10 +66,10 @@ export declare const propertyResolver: import("@feathersjs/schema").Resolver<{
     } | undefined;
     updatedAt?: string | undefined;
     description?: string | undefined;
+    title?: string | undefined;
     agentUserId?: string | null | undefined;
     listingLabel?: string | undefined;
     listingType?: "rent" | "buy" | "commercial" | "new" | undefined;
-    title?: string | undefined;
     verified?: boolean | undefined;
     price?: number | undefined;
     priceCurrency?: string | undefined;
@@ -117,10 +117,10 @@ export declare const propertyExternalResolver: import("@feathersjs/schema").Reso
     } | undefined;
     updatedAt?: string | undefined;
     description?: string | undefined;
+    title?: string | undefined;
     agentUserId?: string | null | undefined;
     listingLabel?: string | undefined;
     listingType?: "rent" | "buy" | "commercial" | "new" | undefined;
-    title?: string | undefined;
     verified?: boolean | undefined;
     price?: number | undefined;
     priceCurrency?: string | undefined;
@@ -212,10 +212,10 @@ export declare const propertyDataResolver: import("@feathersjs/schema").Resolver
     } | undefined;
     updatedAt?: string | undefined;
     description?: string | undefined;
+    title?: string | undefined;
     agentUserId?: string | null | undefined;
     listingLabel?: string | undefined;
     listingType?: "rent" | "buy" | "commercial" | "new" | undefined;
-    title?: string | undefined;
     verified?: boolean | undefined;
     price?: number | undefined;
     priceCurrency?: string | undefined;
@@ -317,10 +317,10 @@ export declare const propertyPatchResolver: import("@feathersjs/schema").Resolve
     } | undefined;
     updatedAt?: string | undefined;
     description?: string | undefined;
+    title?: string | undefined;
     agentUserId?: string | null | undefined;
     listingLabel?: string | undefined;
     listingType?: "rent" | "buy" | "commercial" | "new" | undefined;
-    title?: string | undefined;
     verified?: boolean | undefined;
     price?: number | undefined;
     priceCurrency?: string | undefined;

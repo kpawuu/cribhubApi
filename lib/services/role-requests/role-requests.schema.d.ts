@@ -5,6 +5,8 @@ export declare const roleRequestSchema: import("@feathersjs/typebox").TObject<{
     userId: import("@feathersjs/typebox").TString<string>;
     role: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"landlord">, import("@feathersjs/typebox").TLiteral<"property_manager">, import("@feathersjs/typebox").TLiteral<"agent">]>;
     status: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"approved">, import("@feathersjs/typebox").TLiteral<"rejected">]>;
+    /** Optional message / pitch from the applicant */
+    message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
@@ -13,6 +15,7 @@ export declare const roleRequestSchema: import("@feathersjs/typebox").TObject<{
 export type RoleRequest = Static<typeof roleRequestSchema>;
 export declare const roleRequestValidator: import("@feathersjs/schema").Validator<any, any>;
 export declare const roleRequestResolver: import("@feathersjs/schema").Resolver<{
+    message?: string | undefined;
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
@@ -23,6 +26,7 @@ export declare const roleRequestResolver: import("@feathersjs/schema").Resolver<
     status: "pending" | "approved" | "rejected";
 }, HookContext>;
 export declare const roleRequestExternalResolver: import("@feathersjs/schema").Resolver<{
+    message?: string | undefined;
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
@@ -36,10 +40,13 @@ export declare const roleRequestDataSchema: import("@feathersjs/typebox").TObjec
     userId: import("@feathersjs/typebox").TString<string>;
     role: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"landlord">, import("@feathersjs/typebox").TLiteral<"property_manager">, import("@feathersjs/typebox").TLiteral<"agent">]>;
     status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TLiteral<"pending">>;
+    /** Optional message the applicant wants to include with their request */
+    message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
 }>;
 export type RoleRequestData = Static<typeof roleRequestDataSchema>;
 export declare const roleRequestDataValidator: import("@feathersjs/schema").Validator<any, any>;
 export declare const roleRequestDataResolver: import("@feathersjs/schema").Resolver<{
+    message?: string | undefined;
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
@@ -54,6 +61,8 @@ export declare const roleRequestPatchSchema: import("@feathersjs/typebox").TPart
     userId: import("@feathersjs/typebox").TString<string>;
     role: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"landlord">, import("@feathersjs/typebox").TLiteral<"property_manager">, import("@feathersjs/typebox").TLiteral<"agent">]>;
     status: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"approved">, import("@feathersjs/typebox").TLiteral<"rejected">]>;
+    /** Optional message / pitch from the applicant */
+    message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
@@ -62,6 +71,7 @@ export declare const roleRequestPatchSchema: import("@feathersjs/typebox").TPart
 export type RoleRequestPatch = Static<typeof roleRequestPatchSchema>;
 export declare const roleRequestPatchValidator: import("@feathersjs/schema").Validator<any, any>;
 export declare const roleRequestPatchResolver: import("@feathersjs/schema").Resolver<{
+    message?: string | undefined;
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;

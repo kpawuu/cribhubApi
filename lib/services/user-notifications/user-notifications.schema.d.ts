@@ -28,9 +28,9 @@ export declare const userNotificationResolver: import("@feathersjs/schema").Reso
     _id: string | {};
     createdAt: string;
     userId: string;
-    title: string;
-    category: string;
     eventKey: string;
+    category: string;
+    title: string;
 }, HookContext>;
 export declare const userNotificationExternalResolver: import("@feathersjs/schema").Resolver<{
     metadata?: any;
@@ -43,9 +43,9 @@ export declare const userNotificationExternalResolver: import("@feathersjs/schem
     _id: string | {};
     createdAt: string;
     userId: string;
-    title: string;
-    category: string;
     eventKey: string;
+    category: string;
+    title: string;
 }, HookContext>;
 /** Admin / internal only */
 export declare const userNotificationDataSchema: import("@feathersjs/typebox").TObject<{
@@ -72,9 +72,9 @@ export declare const userNotificationDataResolver: import("@feathersjs/schema").
     _id: string | {};
     createdAt: string;
     userId: string;
-    title: string;
-    category: string;
     eventKey: string;
+    category: string;
+    title: string;
 }, HookContext>;
 export declare const userNotificationPatchSchema: import("@feathersjs/typebox").TObject<{
     readAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<"date-time">, import("@feathersjs/typebox").TNull]>>;
@@ -92,9 +92,9 @@ export declare const userNotificationPatchResolver: import("@feathersjs/schema")
     _id: string | {};
     createdAt: string;
     userId: string;
-    title: string;
-    category: string;
     eventKey: string;
+    category: string;
+    title: string;
 }, HookContext>;
 export declare const userNotificationQueryProperties: import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TPick<import("@feathersjs/typebox").TObject<{
     _id: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
@@ -125,13 +125,13 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
         createdAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         userId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
-        category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
+        category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         readAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         unreadOnly: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         readOnlyOnly: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
     }>;
-    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "createdAt" | "userId" | "updatedAt" | "category" | "eventKey" | "readAt" | "unreadOnly" | "readOnlyOnly")[]>;
+    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "createdAt" | "userId" | "updatedAt" | "eventKey" | "category" | "readAt" | "unreadOnly" | "readOnlyOnly")[]>;
     $and: import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
         _id: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
@@ -177,7 +177,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -188,7 +188,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -278,7 +278,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
-            category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
                 $gt: import("@feathersjs/typebox").TString<string>;
                 $gte: import("@feathersjs/typebox").TString<string>;
                 $lt: import("@feathersjs/typebox").TString<string>;
@@ -289,7 +289,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
-            eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
                 $gt: import("@feathersjs/typebox").TString<string>;
                 $gte: import("@feathersjs/typebox").TString<string>;
                 $lt: import("@feathersjs/typebox").TString<string>;
@@ -380,7 +380,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -391,7 +391,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -481,7 +481,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
-    category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+    eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
         $gt: import("@feathersjs/typebox").TString<string>;
         $gte: import("@feathersjs/typebox").TString<string>;
         $lt: import("@feathersjs/typebox").TString<string>;
@@ -492,7 +492,7 @@ export declare const userNotificationQuerySchema: import("@feathersjs/typebox").
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
-    eventKey: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+    category: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
         $gt: import("@feathersjs/typebox").TString<string>;
         $gte: import("@feathersjs/typebox").TString<string>;
         $lt: import("@feathersjs/typebox").TString<string>;
@@ -547,13 +547,13 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
         createdAt?: number | undefined;
         userId?: number | undefined;
         updatedAt?: number | undefined;
-        category?: number | undefined;
         eventKey?: number | undefined;
+        category?: number | undefined;
         readAt?: number | undefined;
         unreadOnly?: number | undefined;
         readOnlyOnly?: number | undefined;
     };
-    $select: ("_id" | "createdAt" | "userId" | "updatedAt" | "category" | "eventKey" | "readAt" | "unreadOnly" | "readOnlyOnly")[];
+    $select: ("_id" | "createdAt" | "userId" | "updatedAt" | "eventKey" | "category" | "readAt" | "unreadOnly" | "readOnlyOnly")[];
     $and: ({
         _id?: string | {} | Partial<{
             $gt: string | {};
@@ -591,7 +591,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        category?: string | Partial<{
+        eventKey?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -600,7 +600,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        eventKey?: string | Partial<{
+        category?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -674,7 +674,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
                 $in: string | string[];
                 $nin: string | string[];
             } & {}> | undefined;
-            category?: string | Partial<{
+            eventKey?: string | Partial<{
                 $gt: string;
                 $gte: string;
                 $lt: string;
@@ -683,7 +683,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
                 $in: string | string[];
                 $nin: string | string[];
             } & {}> | undefined;
-            eventKey?: string | Partial<{
+            category?: string | Partial<{
                 $gt: string;
                 $gte: string;
                 $lt: string;
@@ -758,7 +758,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        category?: string | Partial<{
+        eventKey?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -767,7 +767,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        eventKey?: string | Partial<{
+        category?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -841,7 +841,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
         $in: string | string[];
         $nin: string | string[];
     } & {}> | undefined;
-    category?: string | Partial<{
+    eventKey?: string | Partial<{
         $gt: string;
         $gte: string;
         $lt: string;
@@ -850,7 +850,7 @@ export declare const userNotificationQueryResolver: import("@feathersjs/schema")
         $in: string | string[];
         $nin: string | string[];
     } & {}> | undefined;
-    eventKey?: string | Partial<{
+    category?: string | Partial<{
         $gt: string;
         $gte: string;
         $lt: string;

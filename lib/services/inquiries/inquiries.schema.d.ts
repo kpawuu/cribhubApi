@@ -13,6 +13,8 @@ export declare const inquirySchema: import("@feathersjs/typebox").TObject<{
     contactMethod: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"call">, import("@feathersjs/typebox").TLiteral<"email">, import("@feathersjs/typebox").TLiteral<"whatsapp">, import("@feathersjs/typebox").TLiteral<"message">]>>;
     message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"new">, import("@feathersjs/typebox").TLiteral<"contacted">, import("@feathersjs/typebox").TLiteral<"viewing_scheduled">, import("@feathersjs/typebox").TLiteral<"closed">, import("@feathersjs/typebox").TLiteral<"lost">]>>;
+    lastMessageAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    lastMessagePreview: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
 }>;
@@ -30,6 +32,8 @@ export declare const inquiryResolver: import("@feathersjs/schema").Resolver<{
     unitId?: string | undefined;
     createdByUserId?: string | undefined;
     contactMethod?: "email" | "message" | "whatsapp" | "call" | undefined;
+    lastMessageAt?: string | undefined;
+    lastMessagePreview?: string | undefined;
     _id: string | {};
     createdAt: string;
     propertyId: string;
@@ -46,6 +50,8 @@ export declare const inquiryExternalResolver: import("@feathersjs/schema").Resol
     unitId?: string | undefined;
     createdByUserId?: string | undefined;
     contactMethod?: "email" | "message" | "whatsapp" | "call" | undefined;
+    lastMessageAt?: string | undefined;
+    lastMessagePreview?: string | undefined;
     _id: string | {};
     createdAt: string;
     propertyId: string;
@@ -73,6 +79,8 @@ export declare const inquiryDataResolver: import("@feathersjs/schema").Resolver<
     unitId?: string | undefined;
     createdByUserId?: string | undefined;
     contactMethod?: "email" | "message" | "whatsapp" | "call" | undefined;
+    lastMessageAt?: string | undefined;
+    lastMessagePreview?: string | undefined;
     _id: string | {};
     createdAt: string;
     propertyId: string;
@@ -80,6 +88,8 @@ export declare const inquiryDataResolver: import("@feathersjs/schema").Resolver<
 export declare const inquiryPatchSchema: import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TObject<{
     status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"new">, import("@feathersjs/typebox").TLiteral<"contacted">, import("@feathersjs/typebox").TLiteral<"viewing_scheduled">, import("@feathersjs/typebox").TLiteral<"closed">, import("@feathersjs/typebox").TLiteral<"lost">]>>;
     message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    lastMessageAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    lastMessagePreview: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
 }>>;
 export type InquiryPatch = Static<typeof inquiryPatchSchema>;
 export declare const inquiryPatchValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -95,6 +105,8 @@ export declare const inquiryPatchResolver: import("@feathersjs/schema").Resolver
     unitId?: string | undefined;
     createdByUserId?: string | undefined;
     contactMethod?: "email" | "message" | "whatsapp" | "call" | undefined;
+    lastMessageAt?: string | undefined;
+    lastMessagePreview?: string | undefined;
     _id: string | {};
     createdAt: string;
     propertyId: string;
@@ -112,6 +124,8 @@ export declare const inquiryQueryProperties: import("@feathersjs/typebox").TPick
     contactMethod: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"call">, import("@feathersjs/typebox").TLiteral<"email">, import("@feathersjs/typebox").TLiteral<"whatsapp">, import("@feathersjs/typebox").TLiteral<"message">]>>;
     message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"new">, import("@feathersjs/typebox").TLiteral<"contacted">, import("@feathersjs/typebox").TLiteral<"viewing_scheduled">, import("@feathersjs/typebox").TLiteral<"closed">, import("@feathersjs/typebox").TLiteral<"lost">]>>;
+    lastMessageAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    lastMessagePreview: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
 }>, ["_id", "propertyId", "agentUserId", "landlordId", "status", "createdAt", "updatedAt"]>;

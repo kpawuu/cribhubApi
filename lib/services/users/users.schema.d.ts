@@ -31,6 +31,10 @@ export declare const userSchema: import("@feathersjs/typebox").TObject<{
     phone: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     nationalId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     defaultCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Set to true once the user completes the onboarding role-selection step. */
+    isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** Arbitrary onboarding preferences stored per role (tenant prefs, landlord details, etc.) */
+    onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
     /** When false, in-app notifications are still created but notification emails are skipped. */
     emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
@@ -53,6 +57,8 @@ export declare const userResolver: import("@feathersjs/schema").Resolver<{
     phone?: string | undefined;
     nationalId?: string | undefined;
     defaultCurrency?: string | undefined;
+    isOnboarded?: boolean | undefined;
+    onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {
@@ -83,6 +89,8 @@ export declare const userExternalResolver: import("@feathersjs/schema").Resolver
     phone?: string | undefined;
     nationalId?: string | undefined;
     defaultCurrency?: string | undefined;
+    isOnboarded?: boolean | undefined;
+    onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {
@@ -124,6 +132,8 @@ export declare const userDataResolver: import("@feathersjs/schema").Resolver<{
     phone?: string | undefined;
     nationalId?: string | undefined;
     defaultCurrency?: string | undefined;
+    isOnboarded?: boolean | undefined;
+    onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {
@@ -167,6 +177,10 @@ export declare const userPatchSchema: import("@feathersjs/typebox").TPartial<imp
     phone: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     nationalId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     defaultCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Set to true once the user completes the onboarding role-selection step. */
+    isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** Arbitrary onboarding preferences stored per role (tenant prefs, landlord details, etc.) */
+    onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
     /** When false, in-app notifications are still created but notification emails are skipped. */
     emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
@@ -189,6 +203,8 @@ export declare const userPatchResolver: import("@feathersjs/schema").Resolver<{
     phone?: string | undefined;
     nationalId?: string | undefined;
     defaultCurrency?: string | undefined;
+    isOnboarded?: boolean | undefined;
+    onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {

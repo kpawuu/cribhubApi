@@ -15,6 +15,8 @@ export declare const agentProfileSchema: import("@feathersjs/typebox").TObject<{
     listingsCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     responseTimeMinutes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     verified: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    ratingAvg: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+    ratingCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
@@ -35,6 +37,8 @@ export declare const agentProfileResolver: import("@feathersjs/schema").Resolver
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    ratingAvg?: number | undefined;
+    ratingCount?: number | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -54,6 +58,8 @@ export declare const agentProfileExternalResolver: import("@feathersjs/schema").
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    ratingAvg?: number | undefined;
+    ratingCount?: number | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -88,6 +94,8 @@ export declare const agentProfileDataResolver: import("@feathersjs/schema").Reso
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    ratingAvg?: number | undefined;
+    ratingCount?: number | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -108,6 +116,8 @@ export declare const agentProfilePatchSchema: import("@feathersjs/typebox").TPar
     listingsCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     responseTimeMinutes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     verified: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    ratingAvg: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+    ratingCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
@@ -128,6 +138,8 @@ export declare const agentProfilePatchResolver: import("@feathersjs/schema").Res
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    ratingAvg?: number | undefined;
+    ratingCount?: number | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -148,6 +160,8 @@ export declare const agentProfileQueryProperties: import("@feathersjs/typebox").
     listingsCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     responseTimeMinutes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     verified: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    ratingAvg: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+    ratingCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;

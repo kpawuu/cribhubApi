@@ -29,6 +29,8 @@ export declare const refreshTokensSchema: import("@feathersjs/typebox").TObject<
         phone: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         nationalId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         defaultCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
@@ -55,6 +57,8 @@ export declare const refreshTokensResolver: import("@feathersjs/schema").Resolve
         phone?: string | undefined;
         nationalId?: string | undefined;
         defaultCurrency?: string | undefined;
+        isOnboarded?: boolean | undefined;
+        onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
@@ -94,6 +98,8 @@ export declare const refreshTokensExternalResolver: import("@feathersjs/schema")
         phone?: string | undefined;
         nationalId?: string | undefined;
         defaultCurrency?: string | undefined;
+        isOnboarded?: boolean | undefined;
+        onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
@@ -148,6 +154,8 @@ export declare const refreshTokensDataSchema: import("@feathersjs/typebox").TPic
         phone: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         nationalId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         defaultCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
@@ -174,6 +182,8 @@ export declare const refreshTokensDataResolver: import("@feathersjs/schema").Res
         phone?: string | undefined;
         nationalId?: string | undefined;
         defaultCurrency?: string | undefined;
+        isOnboarded?: boolean | undefined;
+        onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
@@ -228,6 +238,8 @@ export declare const refreshTokensPatchSchema: import("@feathersjs/typebox").TPa
         phone: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         nationalId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         defaultCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
@@ -254,6 +266,8 @@ export declare const refreshTokensPatchResolver: import("@feathersjs/schema").Re
         phone?: string | undefined;
         nationalId?: string | undefined;
         defaultCurrency?: string | undefined;
+        isOnboarded?: boolean | undefined;
+        onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
@@ -308,6 +322,8 @@ export declare const refreshTokensQueryProperties: import("@feathersjs/typebox")
         phone: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         nationalId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         defaultCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;

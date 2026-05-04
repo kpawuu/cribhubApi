@@ -24,8 +24,8 @@ export declare const noticeResolver: import("@feathersjs/schema").Resolver<{
     smsRecipients?: string[] | undefined;
     _id: string | {};
     createdAt: string;
-    landlordId: string;
     title: string;
+    landlordId: string;
     content: string;
     author: string;
 }, HookContext<NoticesService<import("./notices.class").NoticesParams>>>;
@@ -37,8 +37,8 @@ export declare const noticeExternalResolver: import("@feathersjs/schema").Resolv
     smsRecipients?: string[] | undefined;
     _id: string | {};
     createdAt: string;
-    landlordId: string;
     title: string;
+    landlordId: string;
     content: string;
     author: string;
 }, HookContext<NoticesService<import("./notices.class").NoticesParams>>>;
@@ -62,8 +62,8 @@ export declare const noticeDataResolver: import("@feathersjs/schema").Resolver<{
     smsRecipients?: string[] | undefined;
     _id: string | {};
     createdAt: string;
-    landlordId: string;
     title: string;
+    landlordId: string;
     content: string;
     author: string;
 }, HookContext<NoticesService<import("./notices.class").NoticesParams>>>;
@@ -90,8 +90,8 @@ export declare const noticePatchResolver: import("@feathersjs/schema").Resolver<
     smsRecipients?: string[] | undefined;
     _id: string | {};
     createdAt: string;
-    landlordId: string;
     title: string;
+    landlordId: string;
     content: string;
     author: string;
 }, HookContext<NoticesService<import("./notices.class").NoticesParams>>>;
