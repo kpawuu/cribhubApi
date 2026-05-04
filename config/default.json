@@ -1,8 +1,8 @@
 {
-  "host": "localhost",
-  "port": 3036,
+  "host": "api.cribhub-gh.com",
+  "port": 3000,
   "public": "./public/",
-  "origins": ["http://localhost:3000", "http://localhost:3036"],
+  "origins": ["https://cribhub-gh.com", "https://api.cribhub-gh.com", "https://www.cribhub-gh.com", "https://www.api.cribhub-gh.com/api"],
   "paginate": {
     "default": 25,
     "max": 100
