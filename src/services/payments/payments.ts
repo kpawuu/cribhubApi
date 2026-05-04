@@ -6,6 +6,8 @@ import { ObjectId } from 'mongodb'
 import type { Application, HookContext } from '../../declarations'
 import { authenticateIfExternal } from '../../hooks/authenticate-if-external'
 import { requireRole } from '../../hooks/require-role'
+import { populateRoles } from '../../hooks/populate-roles'
+import { unitIdsForAgent } from '../../hooks/portfolio-unit-ids'
 
 import { PaymentsService, getOptions } from './payments.class'
 import {
@@ -27,6 +29,7 @@ const restrictFind = async (context: HookContext) => {
   const user = context.params.user as any
   if (!user?._id) throw new errors.NotAuthenticated()
   const roles: string[] = Array.isArray(user.roles) ? user.roles : []
+  const uid = user._id.toString()
 
   if (roles.includes('admin')) return context
 
@@ -34,7 +37,7 @@ const restrictFind = async (context: HookContext) => {
     const db = await context.app.get('mongodbClient')
     const assigns = await db
       .collection('property_manager_assignments')
-      .find({ managerUserId: user._id.toString() })
+      .find({ managerUserId: uid })
       .project({ propertyId: 1 })
       .toArray()
     const pids = [...new Set(assigns.map((a: any) => String(a.propertyId)).filter(Boolean))]
@@ -51,13 +54,84 @@ const restrictFind = async (context: HookContext) => {
     return context
   }
 
-  if (roles.includes('tenant') && !roles.includes('admin')) {
-    mergeQuery(context, { tenantId: user._id.toString() })
+  const ors: Record<string, unknown>[] = []
+  if (roles.includes('tenant')) {
+    ors.push({ tenantId: uid })
   }
-  if (roles.includes('landlord') && !roles.includes('admin')) {
-    mergeQuery(context, { landlordId: user._id.toString() })
+  if (roles.includes('landlord')) {
+    ors.push({ landlordId: uid })
+  }
+  if (roles.includes('agent')) {
+    const agentUnitIds = await unitIdsForAgent(context.app, uid)
+    if (agentUnitIds.length === 1) {
+      ors.push({ unitId: agentUnitIds[0] })
+    } else if (agentUnitIds.length > 1) {
+      ors.push({ unitId: { $in: agentUnitIds } })
+    }
+  }
+
+  if (ors.length === 0) {
+    mergeQuery(context, { tenantId: '__none__' })
+    return context
+  }
+  if (ors.length === 1) {
+    mergeQuery(context, ors[0]!)
+  } else {
+    mergeQuery(context, { $or: ors })
   }
   return context
+}
+
+async function loadPaymentRow(context: HookContext) {
+  const db = await context.app.get('mongodbClient')
+  const col = db.collection('payments')
+  const raw = String(context.id || '')
+  let row: any = await col.findOne({ _id: raw as any })
+  if (!row && ObjectId.isValid(raw) && raw.length === 24) {
+    row = await col.findOne({ _id: new ObjectId(raw) })
+  }
+  return row
+}
+
+async function landlordIdsForPropertyManager(app: Application, managerUserId: string): Promise<string[]> {
+  const db = await app.get('mongodbClient')
+  const assigns = await db
+    .collection('property_manager_assignments')
+    .find({ managerUserId: String(managerUserId) })
+    .project({ propertyId: 1 })
+    .toArray()
+  const pids = [...new Set(assigns.map((a: any) => String(a.propertyId)).filter(Boolean))]
+  if (!pids.length) return []
+  const oids: unknown[] = pids.map((i) => (ObjectId.isValid(String(i)) && String(i).length === 24 ? new ObjectId(String(i)) : i))
+  const props = await db.collection('properties').find({ _id: { $in: oids as any } }).project({ landlordId: 1 }).toArray()
+  return [...new Set(props.map((p: any) => String(p.landlordId)).filter(Boolean))]
+}
+
+const restrictPaymentGet = async (context: HookContext) => {
+  if (!context.params.provider) return context
+  const user = context.params.user as any
+  if (!user?._id) throw new errors.NotAuthenticated()
+  const roles: string[] = Array.isArray(user.roles) ? user.roles : []
+  const uid = user._id.toString()
+
+  const row = await loadPaymentRow(context)
+  if (!row) throw new errors.NotFound()
+
+  if (roles.includes('admin')) return context
+  if (roles.includes('tenant') && String(row.tenantId) === uid) return context
+  if (roles.includes('landlord') && String(row.landlordId) === uid) return context
+
+  if (roles.includes('property_manager')) {
+    const lids = await landlordIdsForPropertyManager(context.app, uid)
+    if (lids.includes(String(row.landlordId))) return context
+  }
+
+  if (roles.includes('agent')) {
+    const agentUnitIds = await unitIdsForAgent(context.app, uid)
+    if (agentUnitIds.includes(String(row.unitId))) return context
+  }
+
+  throw new errors.Forbidden('You cannot access this payment.')
 }
 
 /**
@@ -241,8 +315,8 @@ export const payments = (app: Application) => {
     },
     before: {
       all: [schemaHooks.validateQuery(paymentQueryValidator), schemaHooks.resolveQuery(paymentQueryResolver)],
-      find: [authenticateIfExternal('jwt'), restrictFind],
-      get: [authenticateIfExternal('jwt')],
+      find: [authenticateIfExternal('jwt'), populateRoles, restrictFind],
+      get: [authenticateIfExternal('jwt'), populateRoles, restrictPaymentGet],
       create: [
         authenticateIfExternal('jwt'),
         // Action-based (initialize/verify) should bypass manual-entry pipeline.

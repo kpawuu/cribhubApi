@@ -105,7 +105,7 @@ const restrictGet = async (context: HookContext) => {
   if (roles.includes('landlord') && String(prop.landlordId) === String(user._id)) return context
 
   if (roles.includes('agent')) {
-    const n = await db.collection('agent-assignments').countDocuments({
+    const n = await db.collection('agent_assignments').countDocuments({
       agentUserId: user._id.toString(),
       propertyId: String(unit.propertyId)
     })
@@ -141,7 +141,7 @@ const ensurePatchAccess = async (context: HookContext) => {
   if (roles.includes('landlord') && String(prop.landlordId) === String(user._id)) return context
 
   if (roles.includes('agent')) {
-    const n = await db.collection('agent-assignments').countDocuments({
+    const n = await db.collection('agent_assignments').countDocuments({
       agentUserId: user._id.toString(),
       propertyId: String(unit.propertyId)
     })

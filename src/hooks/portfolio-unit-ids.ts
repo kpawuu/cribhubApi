@@ -35,7 +35,7 @@ export async function unitIdsForPropertyManager(app: Application, managerUserId:
 export async function unitIdsForAgent(app: Application, agentUserId: string): Promise<string[]> {
   const db = await app.get('mongodbClient')
   const assigns = await db
-    .collection('agent-assignments')
+    .collection('agent_assignments')
     .find({ agentUserId: String(agentUserId) })
     .project({ propertyId: 1 })
     .toArray()

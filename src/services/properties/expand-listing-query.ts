@@ -61,7 +61,7 @@ export async function expandListingQuery(context: HookContext) {
   if (sa === true || sa === 'true') {
     delete q.superAgent
     const db = await context.app.get('mongodbClient')
-    const ids = await db.collection('agent-assignments').distinct('propertyId', {
+    const ids = await db.collection('agent_assignments').distinct('propertyId', {
       propertyId: { $exists: true, $nin: [null, ''] }
     })
     const idList = (ids as unknown[]).map((x) => String(x)).filter(Boolean)

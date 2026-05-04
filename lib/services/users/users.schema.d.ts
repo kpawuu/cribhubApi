@@ -121,6 +121,11 @@ export declare const userDataSchema: import("@feathersjs/typebox").TObject<{
     phone: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     nationalId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     defaultCurrency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /**
+     * Optional. If set to landlord | agent | property_manager, `users` after-create hook
+     * creates a pending `role-requests` row (role is not granted until approval).
+     * Omitted or `tenant`: only the default tenant role is applied. See README "Roles".
+     */
     requestedRole: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"tenant">, import("@feathersjs/typebox").TLiteral<"landlord">, import("@feathersjs/typebox").TLiteral<"property_manager">, import("@feathersjs/typebox").TLiteral<"agent">]>>;
 }>;
 export type UserData = Static<typeof userDataSchema>;

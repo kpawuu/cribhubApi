@@ -78,7 +78,7 @@ const restrictFind = async (context: HookContext) => {
   if (roles.includes('agent')) {
     const db = await context.app.get('mongodbClient')
     const assigns = await db
-      .collection('agent-assignments')
+      .collection('agent_assignments')
       .find({ agentUserId: user._id.toString() })
       .project({ propertyId: 1 })
       .toArray()
@@ -127,7 +127,7 @@ const restrictGet = async (context: HookContext) => {
   if (roles.includes('landlord') && String(prop.landlordId) === String(user._id)) return context
 
   if (roles.includes('agent')) {
-    const count = await db.collection('agent-assignments').countDocuments({
+    const count = await db.collection('agent_assignments').countDocuments({
       agentUserId: user._id.toString(),
       propertyId: String(unit.propertyId)
     })

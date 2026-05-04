@@ -81,3 +81,8 @@ with payloads like:
 
 - Session onboarding helpers may store `roleRequestId` / redirect hints in `sessionStorage`; the app clears those on **logout** so a different user on the same browser does not inherit state.
 
+### Data access (multi-tenant)
+
+- External `find` / `get` hooks that scope by role rely on `populateRoles` so `params.user.roles` matches `user-roles` (JWT users may not embed roles).
+- Mongo collection for agent assignments is **`agent_assignments`** (Feathers path remains `agent-assignments`).
+

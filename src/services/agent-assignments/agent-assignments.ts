@@ -1,10 +1,11 @@
 import { mergeQuery } from '../../hooks/merge-query'
 import { hooks as schemaHooks } from '@feathersjs/schema'
 import { errors } from '@feathersjs/errors'
+import { ObjectId } from 'mongodb'
 import type { Application, HookContext } from '../../declarations'
 import { authenticateIfExternal } from '../../hooks/authenticate-if-external'
 import { requireRole } from '../../hooks/require-role'
-import { restrictQueryToOwner } from '../../hooks/restrict-query-to-owner'
+import { populateRoles } from '../../hooks/populate-roles'
 
 import { AgentAssignmentsService, getOptions } from './agent-assignments.class'
 import {
@@ -73,17 +74,92 @@ const ensurePropertyOwnedByLandlordUnlessAdmin = async (context: HookContext) =>
   return context
 }
 
+async function loadAssignmentRow(context: HookContext) {
+  const db = await context.app.get('mongodbClient')
+  const col = db.collection('agent_assignments')
+  const raw = String(context.id || '')
+  let row: any = await col.findOne({ _id: raw as any })
+  if (!row && ObjectId.isValid(raw) && raw.length === 24) {
+    row = await col.findOne({ _id: new ObjectId(raw) })
+  }
+  return row
+}
+
 const restrictFind = async (context: HookContext) => {
   if (!context.params.provider) return context
   const user = context.params.user as any
   if (!user?._id) throw new errors.NotAuthenticated()
   const roles: string[] = Array.isArray(user.roles) ? user.roles : []
+  const uid = user._id.toString()
 
-  // Agents see assignments for themselves; landlords see theirs by joining via property ownership
-  if (roles.includes('agent') && !roles.includes('admin')) {
-    mergeQuery(context, { agentUserId: user._id.toString() })
+  if (roles.includes('admin')) return context
+
+  if (roles.includes('landlord') && !roles.includes('admin')) {
+    const db = await context.app.get('mongodbClient')
+    const propIds = (await db.collection('properties').distinct('_id', { landlordId: uid })).map((x) => String(x))
+    if (!propIds.length) {
+      mergeQuery(context, { propertyId: '__none__' })
+    } else if (propIds.length === 1) {
+      mergeQuery(context, { propertyId: propIds[0] })
+    } else {
+      mergeQuery(context, { propertyId: { $in: propIds } })
+    }
+    return context
   }
-  return context
+
+  if (roles.includes('property_manager') && !roles.includes('admin')) {
+    const db = await context.app.get('mongodbClient')
+    const assigns = await db.collection('property_manager_assignments').find({ managerUserId: uid }).project({ propertyId: 1 }).toArray()
+    const pids = [...new Set(assigns.map((a: any) => String(a.propertyId)).filter(Boolean))]
+    if (!pids.length) {
+      mergeQuery(context, { propertyId: '__none__' })
+    } else if (pids.length === 1) {
+      mergeQuery(context, { propertyId: pids[0] })
+    } else {
+      mergeQuery(context, { propertyId: { $in: pids } })
+    }
+    return context
+  }
+
+  if (roles.includes('agent') && !roles.includes('admin')) {
+    mergeQuery(context, { agentUserId: uid })
+    return context
+  }
+
+  throw new errors.Forbidden('You are not allowed to list agent assignments.')
+}
+
+const restrictAssignmentGet = async (context: HookContext) => {
+  if (!context.params.provider) return context
+  const user = context.params.user as any
+  if (!user?._id) throw new errors.NotAuthenticated()
+  const roles: string[] = Array.isArray(user.roles) ? user.roles : []
+  const uid = user._id.toString()
+
+  const row = await loadAssignmentRow(context)
+  if (!row) throw new errors.NotFound()
+
+  if (roles.includes('admin')) return context
+  if (roles.includes('agent') && String(row.agentUserId) === uid) return context
+
+  const db = await context.app.get('mongodbClient')
+  const pid = String(row.propertyId || '')
+  const propIdQuery =
+    ObjectId.isValid(pid) && pid.length === 24 ? new ObjectId(pid) : pid
+  const prop = await db.collection('properties').findOne({ _id: propIdQuery as any })
+  if (!prop) throw new errors.Forbidden()
+
+  if (roles.includes('landlord') && String(prop.landlordId) === uid) return context
+
+  if (roles.includes('property_manager')) {
+    const n = await db.collection('property_manager_assignments').countDocuments({
+      managerUserId: uid,
+      propertyId: String(row.propertyId)
+    })
+    if (n > 0) return context
+  }
+
+  throw new errors.Forbidden('You cannot access this assignment.')
 }
 
 export const agentAssignments = (app: Application) => {
@@ -98,8 +174,8 @@ export const agentAssignments = (app: Application) => {
     },
     before: {
       all: [schemaHooks.validateQuery(agentAssignmentQueryValidator), schemaHooks.resolveQuery(agentAssignmentQueryResolver)],
-      find: [authenticateIfExternal('jwt'), restrictFind],
-      get: [authenticateIfExternal('jwt')],
+      find: [authenticateIfExternal('jwt'), populateRoles, restrictFind],
+      get: [authenticateIfExternal('jwt'), populateRoles, restrictAssignmentGet],
       create: [
         authenticateIfExternal('jwt'),
         requireRole('landlord', 'admin'),
