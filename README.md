@@ -65,6 +65,19 @@ with payloads like:
 
 ## Roles
 
-- `POST /users` grants **tenant** by default via `user-roles`.
-- Optional `requestedRole` at signup creates a `role-requests` entry (`pending`), to be approved later.
+### Default on signup (`POST /users`)
+
+- Every new user receives the **tenant** role immediately via the `user-roles` service (`ensureDefaultTenantRole` in `src/services/users/users.ts`).
+- `isOnboarded` starts as `false` until the client marks onboarding complete (see user patch / product flows).
+
+### Optional `requestedRole` on `POST /users`
+
+- **Shape:** optional field on the create payload, one of `tenant` | `landlord` | `property_manager` | `agent` (see `userDataSchema` in `src/services/users/users.schema.ts`).
+- **Behavior:** if `requestedRole` is **omitted** or **`tenant`**, no extra row is created (the user already has tenant).
+- If `requestedRole` is **`landlord`**, **`agent`**, or **`property_manager`**, the API creates a **`role-requests`** document with `status: 'pending'`. The role is **not** granted on `user-roles` until an admin (or your approval flow) accepts the request.
+- **CribHub UI:** the primary client no longer sends `requestedRole` at signup; users choose non-tenant roles during in-app onboarding, which also creates pending `role-requests`. The field remains supported for **legacy clients**, **mobile**, **Postman**, or **server-to-server** signup if you need the same behavior without the onboarding UI.
+
+### Related client behavior (CribHub)
+
+- Session onboarding helpers may store `roleRequestId` / redirect hints in `sessionStorage`; the app clears those on **logout** so a different user on the same browser does not inherit state.
 

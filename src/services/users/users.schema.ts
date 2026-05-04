@@ -90,7 +90,11 @@ export const userDataSchema = Type.Object(
     phone: Type.Optional(Type.String()),
     nationalId: Type.Optional(Type.String()),
     defaultCurrency: Type.Optional(Type.String()),
-    // optional requested role on signup
+    /**
+     * Optional. If set to landlord | agent | property_manager, `users` after-create hook
+     * creates a pending `role-requests` row (role is not granted until approval).
+     * Omitted or `tenant`: only the default tenant role is applied. See README "Roles".
+     */
     requestedRole: Type.Optional(
       Type.Union([Type.Literal('tenant'), Type.Literal('landlord'), Type.Literal('property_manager'), Type.Literal('agent')])
     )
