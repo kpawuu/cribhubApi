@@ -1,0 +1,62 @@
+{
+  "name": "rentflow_api",
+  "description": "RentFlow / CribHub API (FeathersJS + MongoDB)",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">= 20"
+  },
+  "feathers": {
+    "language": "ts",
+    "packager": "npm",
+    "database": "mongodb",
+    "framework": "koa",
+    "transports": [
+      "rest",
+      "websockets"
+    ],
+    "schema": "typebox"
+  },
+  "main": "lib/index",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development nodemon -x ts-node src/index.ts",
+    "compile": "shx rm -rf lib/ && tsc",
+    "start": "node lib/",
+    "test": "echo \"(no tests yet)\""
+  },
+  "dependencies": {
+    "@feathersjs/adapter-commons": "^5.0.31",
+    "@feathersjs/authentication": "^5.0.31",
+    "@feathersjs/authentication-local": "^5.0.31",
+    "@feathersjs/authentication-oauth": "^5.0.31",
+    "@feathersjs/configuration": "^5.0.31",
+    "@feathersjs/errors": "^5.0.31",
+    "@feathersjs/feathers": "^5.0.31",
+    "@feathersjs/koa": "^5.0.31",
+    "@feathersjs/mongodb": "^5.0.31",
+    "@feathersjs/schema": "^5.0.31",
+    "@feathersjs/socketio": "^5.0.31",
+    "@feathersjs/typebox": "^5.0.31",
+    "@koa/router": "^13.1.0",
+    "dotenv": "^16.4.5",
+    "feathers-authentication-management": "^5.0.1",
+    "feathers-mailer": "^4.1.1",
+    "koa-body": "^6.0.1",
+    "@w3lcome/feathers-refresh-token": "^0.1.1",
+    "mongodb": "^6.10.0",
+    "moment": "^2.30.1",
+    "cloudinary": "^2.6.0",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.3",
+    "@types/koa__router": "^12.0.4",
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.9",
+    "shx": "^0.3.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
+

@@ -1,0 +1,5109 @@
+{
+  "info": {
+    "name": "RentFlow / CribHub API (complete)",
+    "description": "**FeathersJS v5 + Koa** REST surface for `rentflow_api`. Default port **3036**.\n\n**Auth**: Run **Authentication → Login (local)**; tests auto-save `accessToken`, `refreshToken`, `userId`, `userEmail` when present.\n\n**URL**: Each request sets `protocol`, `host`, `port`, `path`, and `query` (not only `raw`) so Postman shows the endpoint after import. Use environment vars **`apiProtocol`**, **`apiHost`**, **`apiPort`**; optional **`baseUrl`** = `{{apiProtocol}}://{{apiHost}}:{{apiPort}}` for scripts.\n\n**Real-time**: Socket.io shares the same base URL; this collection is **HTTP only**.\n\n**Paystack webhook**: Requires raw body + `x-paystack-signature`; use Paystack CLI or dashboard replays for real tests.\n\n**Multipart**: `POST …/files-uploader/file-upload` with form fields + file(s).\n\n**OAuth** (optional): If configured, browser flows use `/oauth/google`, `/oauth/facebook` (see `@feathersjs/authentication-oauth`).\n\n**Admin bootstrap**: `POST /admin-bootstrap` requires server env **`ADMIN_BOOTSTRAP_SECRET`** (≥16 chars) matching Postman **`{{adminBootstrapSecret}}`**. Then use **Create admin user** or **Grant admin to existing user**.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "apiProtocol",
+      "value": "http"
+    },
+    {
+      "key": "apiHost",
+      "value": "localhost"
+    },
+    {
+      "key": "apiPort",
+      "value": "3036"
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3036"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "`POST /authentication` — strategies: `local`, `jwt`. Unverified users may receive 403 on login.",
+      "item": [
+        {
+          "name": "Login (local)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/authentication",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "authentication"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"strategy\": \"local\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  const j = pm.response.json();",
+                  "  if (j.accessToken) pm.environment.set('accessToken', j.accessToken);",
+                  "  if (j.refreshToken) pm.environment.set('refreshToken', j.refreshToken);",
+                  "  const u = j.user || j.authentication?.user;",
+                  "  if (u && u._id) pm.environment.set('userId', String(u._id));",
+                  "  if (u && u.email) pm.environment.set('userEmail', u.email);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Authenticate (JWT)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/authentication",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "authentication"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"strategy\": \"jwt\",\n  \"accessToken\": \"{{accessToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin bootstrap",
+      "description": "**Public** `POST /admin-bootstrap` (no JWT). Server must set **`ADMIN_BOOTSTRAP_SECRET`** (min 16 characters). Postman **`adminBootstrapSecret`** must match exactly.\n\n- **Create admin user**: new account; gets **tenant** (default signup) + **admin**; **isVerified** set true so login works.\n- **Grant admin to existing user**: `mode: promote` + email; marks verified and adds **admin** if missing.",
+      "item": [
+        {
+          "name": "Create admin user (new account)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/admin-bootstrap",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "admin-bootstrap"
+              ]
+            },
+            "description": "Set `adminBootstrapSecret` in Postman environment = `ADMIN_BOOTSTRAP_SECRET` on the API. Then run Login with the new email/password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"secret\": \"{{adminBootstrapSecret}}\",\n  \"mode\": \"create\",\n  \"email\": \"admin@example.com\",\n  \"password\": \"ChangeMe_Str0ng!\",\n  \"fullName\": \"Site Admin\",\n  \"phone\": \"+233200000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Grant admin to existing user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/admin-bootstrap",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "admin-bootstrap"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"secret\": \"{{adminBootstrapSecret}}\",\n  \"mode\": \"promote\",\n  \"email\": \"{{userEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Refresh tokens",
+      "description": "`POST` exchanges refresh token. `PATCH` / `DELETE` require JWT per hooks.",
+      "item": [
+        {
+          "name": "Create (exchange refresh)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/refresh-tokens",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "refresh-tokens"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/refresh-tokens?$limit=25",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "refresh-tokens"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/refresh-tokens/{{refreshTokenRowId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "refresh-tokens",
+                "{{refreshTokenRowId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/refresh-tokens/{{refreshTokenRowId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "refresh-tokens",
+                "{{refreshTokenRowId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isValid\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/refresh-tokens/{{refreshTokenRowId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "refresh-tokens",
+                "{{refreshTokenRowId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "**create** is public signup. External **find/get/patch/remove** scoped to self (non-admin).",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/users?$limit=10",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/users/{{userId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create (signup)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/users",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "users"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo+postman@example.com\",\n  \"password\": \"Str0ngP@ssw0rd!\",\n  \"fullName\": \"Postman User\",\n  \"phone\": \"+233200000000\",\n  \"requestedRole\": \"tenant\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch (self)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/users/{{userId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"defaultCurrency\": \"GHS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove (self)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/users/{{userId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "User roles",
+      "description": "External **create**: only **tenant** self-assign. Other roles via admin / approved **role-requests**.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-roles?$limit=100&userId={{userId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-roles"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "100"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-roles/{{userRoleId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-roles",
+                "{{userRoleId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create (self tenant)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-roles",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-roles"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"role\": \"tenant\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-roles/{{userRoleId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-roles",
+                "{{userRoleId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-roles/{{userRoleId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-roles",
+                "{{userRoleId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Role requests",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/role-requests?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "role-requests"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/role-requests/{{roleRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "role-requests",
+                "{{roleRequestId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/role-requests",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "role-requests"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"role\": \"landlord\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/role-requests/{{roleRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "role-requests",
+                "{{roleRequestId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"notes\": \"Approved via Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/role-requests/{{roleRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "role-requests",
+                "{{roleRequestId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth management",
+      "description": "`feathers-authentication-management` — POST `{ action, value }`.",
+      "item": [
+        {
+          "name": "checkUnique",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/auth-management",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "auth-management"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"checkUnique\",\n  \"value\": {\n    \"email\": \"new@example.com\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "sendResetPwd",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/auth-management",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "auth-management"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"sendResetPwd\",\n  \"value\": {\n    \"email\": \"{{userEmail}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "resetPwdLong",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/auth-management",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "auth-management"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"resetPwdLong\",\n  \"value\": {\n    \"token\": \"TOKEN_FROM_EMAIL\",\n    \"password\": \"NewStr0ng!\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "resetPwdShort",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/auth-management",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "auth-management"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"resetPwdShort\",\n  \"value\": {\n    \"user\": {\n      \"email\": \"{{userEmail}}\"\n    },\n    \"token\": \"000000\",\n    \"password\": \"NewStr0ng!\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "passwordChange",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/auth-management",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "auth-management"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"passwordChange\",\n  \"value\": {\n    \"user\": {\n      \"email\": \"{{userEmail}}\"\n    },\n    \"oldPassword\": \"{{userPassword}}\",\n    \"password\": \"NewStr0ng!\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "verifySignupLong",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/auth-management",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "auth-management"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"verifySignupLong\",\n  \"value\": {\n    \"token\": \"VERIFY_TOKEN_FROM_EMAIL\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "resendVerifySignup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/auth-management",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "auth-management"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"resendVerifySignup\",\n  \"value\": {\n    \"email\": \"{{userEmail}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Delete account",
+      "description": "JWT + `{ password }`.",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/delete-account",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "delete-account"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "description": "`find` returns one summary object (role-scoped counts).",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/dashboard?$limit=1",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listing sidebar",
+      "description": "Public `find` — no auth.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/listing-sidebar",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "listing-sidebar"
+              ]
+            },
+            "description": "Returns `popularSearches` and `nearbyAreas` for UI sidebars."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Properties",
+      "description": "Listing queries support `$search`, `type`, `superAgent`, `mine`, etc. (see `properties` service + schema).",
+      "item": [
+        {
+          "name": "Find (catalog)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/properties?$limit=12&$sort[createdAt]=-1",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "12"
+                },
+                {
+                  "key": "$sort[createdAt]",
+                  "value": "-1"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Find (mine)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/properties?mine=true&$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "mine",
+                  "value": "true"
+                },
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Find (search)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/properties?$limit=12&$search=East+Legon",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "properties"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "12"
+                },
+                {
+                  "key": "$search",
+                  "value": "East+Legon"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/properties/{{propertyId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "properties",
+                "{{propertyId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/properties",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "properties"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Tower\",\n  \"address\": \"1 Test Street\",\n  \"city\": \"Accra\",\n  \"country\": \"Ghana\",\n  \"propertyType\": \"Apartment\",\n  \"description\": \"Seed from Postman\",\n  \"area\": \"East Legon\",\n  \"bedrooms\": 2,\n  \"bathrooms\": 2,\n  \"price\": 3500,\n  \"priceCurrency\": \"GHS\",\n  \"pricePeriod\": \"monthly\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/properties/{{propertyId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "properties",
+                "{{propertyId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated via Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/properties/{{propertyId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "properties",
+                "{{propertyId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Units",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/units?$limit=50&propertyId={{propertyId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "units"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                },
+                {
+                  "key": "propertyId",
+                  "value": "{{propertyId}}"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/units/{{unitId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "units",
+                "{{unitId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/units",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "units"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"unitNumber\": \"A-101\",\n  \"bedrooms\": 2,\n  \"bathrooms\": 2,\n  \"rentAmount\": 2500,\n  \"rentCurrency\": \"GHS\",\n  \"status\": \"vacant\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/units/{{unitId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "units",
+                "{{unitId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"occupied\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/units/{{unitId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "units",
+                "{{unitId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rental applications",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-applications?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-applications"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-applications/{{rentalApplicationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-applications",
+                "{{rentalApplicationId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-applications",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-applications"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"applicationData\": {\n    \"employment\": \"demo\",\n    \"monthlyIncome\": 5000\n  },\n  \"documents\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-applications/{{rentalApplicationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-applications",
+                "{{rentalApplicationId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\",\n  \"reviewNotes\": \"Welcome\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-applications/{{rentalApplicationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-applications",
+                "{{rentalApplicationId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rental contracts",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-contracts?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-contracts"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-contracts/{{rentalContractId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-contracts",
+                "{{rentalContractId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-contracts",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-contracts"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"landlordId\": \"{{landlordUserId}}\",\n  \"tenantId\": \"{{tenantUserId}}\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-12-31\",\n  \"monthlyRent\": 2500,\n  \"rentCurrency\": \"GHS\",\n  \"status\": \"draft\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-contracts/{{rentalContractId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-contracts",
+                "{{rentalContractId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"sent\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/rental-contracts/{{rentalContractId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "rental-contracts",
+                "{{rentalContractId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Maintenance requests",
+      "description": "Create attaches `tenantId` from JWT. `category` required.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/maintenance-requests?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "maintenance-requests"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/maintenance-requests/{{maintenanceRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "maintenance-requests",
+                "{{maintenanceRequestId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/maintenance-requests",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "maintenance-requests"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"title\": \"Leaky tap\",\n  \"description\": \"Kitchen tap drips\",\n  \"category\": \"plumbing\",\n  \"priority\": \"medium\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/maintenance-requests/{{maintenanceRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "maintenance-requests",
+                "{{maintenanceRequestId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in_progress\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/maintenance-requests/{{maintenanceRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "maintenance-requests",
+                "{{maintenanceRequestId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Communications",
+      "description": "`landlordId` attached on create. Body: `fromName`, `property`, `message`.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/communications?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "communications"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/communications/{{communicationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "communications",
+                "{{communicationId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/communications",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "communications"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromName\": \"Landlord Demo\",\n  \"property\": \"{{propertyId}}\",\n  \"message\": \"Portfolio update for tenants\",\n  \"type\": \"notice\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/communications/{{communicationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "communications",
+                "{{communicationId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isRead\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/communications/{{communicationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "communications",
+                "{{communicationId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notices",
+      "description": "`landlordId` + `author` attached from user when missing.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/notices?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "notices"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/notices/{{noticeId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "notices",
+                "{{noticeId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/notices",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "notices"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Water shutdown\",\n  \"content\": \"Scheduled maintenance Tuesday 10am.\",\n  \"type\": \"building\",\n  \"author\": \"Property Office\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/notices/{{noticeId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "notices",
+                "{{noticeId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated title\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/notices/{{noticeId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "notices",
+                "{{noticeId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Exchange rates",
+      "description": "`landlordId` attached on create. Data: `targetCurrency`, `rate`, optional `baseCurrency`.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/exchange-rates?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "exchange-rates"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/exchange-rates/{{exchangeRateId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "exchange-rates",
+                "{{exchangeRateId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/exchange-rates",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "exchange-rates"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetCurrency\": \"USD\",\n  \"rate\": 0.065,\n  \"baseCurrency\": \"GHS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/exchange-rates/{{exchangeRateId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "exchange-rates",
+                "{{exchangeRateId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rate\": 0.066\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/exchange-rates/{{exchangeRateId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "exchange-rates",
+                "{{exchangeRateId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "description": "**Manual entry** (landlord): body uses `paymentDataSchema` — `tenantId`, `unitId`, `amount` (+ optional fields); `landlordId` + `reference` auto.\n\n**Paystack**: `create` with `action: initialize` or `action: verify`.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/payments?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "payments"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/payments/{{paymentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "payments",
+                "{{paymentId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create (manual entry)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/payments",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "payments"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantUserId}}\",\n  \"unitId\": \"{{unitId}}\",\n  \"amount\": 100,\n  \"currency\": \"GHS\",\n  \"payerName\": \"Tenant Demo\",\n  \"payerPhone\": \"+233200000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create (Paystack initialize)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/payments",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "payments"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"initialize\",\n  \"email\": \"{{userEmail}}\",\n  \"amount\": 100,\n  \"currency\": \"GHS\",\n  \"unitId\": \"{{unitId}}\",\n  \"landlordId\": \"{{landlordUserId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create (Paystack verify)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/payments",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "payments"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"verify\",\n  \"reference\": \"paystack_reference_from_checkout\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/payments/{{paymentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "payments",
+                "{{paymentId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metadata\": {\n    \"note\": \"postman\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/payments/{{paymentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "payments",
+                "{{paymentId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Paystack webhook",
+      "description": "Public `POST`. Signature = HMAC-SHA512(raw JSON body, `PAYSTACK_SECRET_KEY`).",
+      "item": [
+        {
+          "name": "Create (sample — expect 403 without valid signature)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/paystack-webhook",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "paystack-webhook"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"charge.success\",\n  \"data\": {\n    \"reference\": \"ref_postman_test\",\n    \"amount\": 10000,\n    \"currency\": \"GHS\",\n    \"channel\": \"card\",\n    \"paid_at\": \"2026-01-01T12:00:00Z\",\n    \"metadata\": {\n      \"tenant_id\": \"{{tenantUserId}}\",\n      \"landlord_id\": \"{{landlordUserId}}\",\n      \"unit_id\": \"{{unitId}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Legal documents",
+      "description": "`userId` attached from JWT on create.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/legal-documents?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "legal-documents"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/legal-documents/{{legalDocumentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "legal-documents",
+                "{{legalDocumentId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/legal-documents",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "legal-documents"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Notice to quit (draft)\",\n  \"documentType\": \"notice\",\n  \"jurisdiction\": \"Ghana\",\n  \"content\": \"Draft body…\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/legal-documents/{{legalDocumentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "legal-documents",
+                "{{legalDocumentId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Renamed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/legal-documents/{{legalDocumentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "legal-documents",
+                "{{legalDocumentId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Virtual viewing requests",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/virtual-viewing-requests?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "virtual-viewing-requests"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/virtual-viewing-requests/{{virtualViewingRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "virtual-viewing-requests",
+                "{{virtualViewingRequestId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/virtual-viewing-requests",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "virtual-viewing-requests"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"unitId\": \"{{unitId}}\",\n  \"name\": \"Jane Viewer\",\n  \"email\": \"jane@example.com\",\n  \"phone\": \"+233200000001\",\n  \"preferredDate\": \"2026-06-01\",\n  \"preferredTime\": \"14:00\",\n  \"message\": \"Weekend preferred\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/virtual-viewing-requests/{{virtualViewingRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "virtual-viewing-requests",
+                "{{virtualViewingRequestId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/virtual-viewing-requests/{{virtualViewingRequestId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "virtual-viewing-requests",
+                "{{virtualViewingRequestId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verification documents",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/verification-documents?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "verification-documents"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/verification-documents/{{verificationDocumentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "verification-documents",
+                "{{verificationDocumentId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/verification-documents",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "verification-documents"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleRequestId\": \"{{roleRequestId}}\",\n  \"documentType\": \"national_id\",\n  \"documentUrl\": \"https://example.com/id-scan.pdf\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/verification-documents/{{verificationDocumentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "verification-documents",
+                "{{verificationDocumentId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"documentType\": \"national_id\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/verification-documents/{{verificationDocumentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "verification-documents",
+                "{{verificationDocumentId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "SMS (mnotify)",
+      "description": "Roles: admin | landlord | property_manager.",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/sms",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "sms"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient\": [\n    \"233200000000\"\n  ],\n  \"message\": \"RentFlow test SMS\",\n  \"sender\": \"RentFlow\",\n  \"is_schedule\": false,\n  \"schedule_date\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI",
+      "description": "Actions: `generate-contract`, `generate-legal-document`.",
+      "item": [
+        {
+          "name": "Create — generate-contract",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/ai",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "ai"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"generate-contract\",\n  \"contractId\": \"{{rentalContractId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Create — generate-legal-document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/ai",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "ai"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"generate-legal-document\",\n  \"title\": \"Draft rider\",\n  \"documentType\": \"rider\",\n  \"jurisdiction\": \"Ghana\",\n  \"prompt\": \"Short bullet terms\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/files?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "files"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/files/{{fileId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "files",
+                "{{fileId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/files",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "files"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entityId\": \"{{propertyId}}\",\n  \"entityType\": \"properties\",\n  \"fileName\": \"doc.pdf\",\n  \"fileType\": \"application/pdf\",\n  \"fileSize\": 1024,\n  \"fileUrl\": \"https://example.com/doc.pdf\",\n  \"tags\": [\n    \"postman\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/files/{{fileId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "files",
+                "{{fileId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tags\": [\n    \"postman\",\n    \"v2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/files/{{fileId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "files",
+                "{{fileId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Files uploader",
+      "description": "Koa route **POST /files-uploader/file-upload** (multipart). Feathers service path **POST /files-uploader** delegates to `create` with parsed files.",
+      "item": [
+        {
+          "name": "Multipart POST /files-uploader/file-upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "entityType",
+                  "value": "properties",
+                  "type": "text"
+                },
+                {
+                  "key": "entityId",
+                  "value": "{{propertyId}}",
+                  "type": "text"
+                },
+                {
+                  "key": "purpose",
+                  "value": "gallery",
+                  "type": "text"
+                },
+                {
+                  "key": "files",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/files-uploader/file-upload",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "files-uploader",
+                "file-upload"
+              ]
+            },
+            "description": "JWT required. Match field names to `koa-body` / formidable setup."
+          }
+        },
+        {
+          "name": "Create (service path — prefer multipart route)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/files-uploader",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "files-uploader"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Prefer /files-uploader/file-upload for real uploads\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent profiles",
+      "description": "`displayName` required on create.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-profiles?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-profiles"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-profiles/{{agentProfileId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-profiles",
+                "{{agentProfileId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-profiles",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-profiles"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"displayName\": \"Kwame Agent\",\n  \"agency\": \"Demo Realty\",\n  \"phone\": \"+233200000002\",\n  \"bio\": \"Postman seed profile\",\n  \"regions\": [\n    \"Greater Accra\"\n  ],\n  \"languages\": [\n    \"en\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-profiles/{{agentProfileId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-profiles",
+                "{{agentProfileId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Updated bio\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-profiles/{{agentProfileId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-profiles",
+                "{{agentProfileId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agent assignments",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-assignments?$limit=100",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-assignments"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "100"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-assignments/{{agentAssignmentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-assignments",
+                "{{agentAssignmentId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-assignments",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-assignments"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"agentUserId\": \"{{agentUserId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-assignments/{{agentAssignmentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-assignments",
+                "{{agentAssignmentId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/agent-assignments/{{agentAssignmentId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "agent-assignments",
+                "{{agentAssignmentId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inquiries",
+      "description": "",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/inquiries?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "inquiries"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/inquiries/{{inquiryId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "inquiries",
+                "{{inquiryId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/inquiries",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "inquiries"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"name\": \"Lead\",\n  \"email\": \"lead@example.com\",\n  \"message\": \"Is this still available?\",\n  \"contactMethod\": \"email\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/inquiries/{{inquiryId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "inquiries",
+                "{{inquiryId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"contacted\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/inquiries/{{inquiryId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "inquiries",
+                "{{inquiryId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "description": "`userId` attached from JWT on create.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/favorites?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "favorites"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/favorites/{{favoriteId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "favorites",
+                "{{favoriteId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/favorites",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "favorites"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": \"{{propertyId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/favorites/{{favoriteId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "favorites",
+                "{{favoriteId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/favorites/{{favoriteId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "favorites",
+                "{{favoriteId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "User notifications",
+      "description": "Create typically **admin/internal**; consumers usually **find/patch**.",
+      "item": [
+        {
+          "name": "Find",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-notifications?$limit=50",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-notifications"
+              ],
+              "query": [
+                {
+                  "key": "$limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Get",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-notifications/{{userNotificationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-notifications",
+                "{{userNotificationId}}"
+              ]
+            },
+            "description": ""
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-notifications",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-notifications"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"eventKey\": \"postman.test\",\n  \"category\": \"system\",\n  \"title\": \"Test\",\n  \"body\": \"Hello from Postman\",\n  \"linkUrl\": \"/dashboard\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Patch (mark read)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-notifications/{{userNotificationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-notifications",
+                "{{userNotificationId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"readAt\": \"2026-01-01T12:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remove",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/user-notifications/{{userNotificationId}}",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "user-notifications",
+                "{{userNotificationId}}"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mailer",
+      "description": "`feathers-mailer` — nodemailer-shaped **create**. Often internal-only in production.",
+      "item": [
+        {
+          "name": "Create (send)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/mailer",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "mailer"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"\\\"RentFlow\\\" <no-reply@example.com>\",\n  \"to\": \"you@example.com\",\n  \"subject\": \"Postman test\",\n  \"text\": \"Hello\",\n  \"html\": \"<p>Hello</p>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "OAuth (optional)",
+      "description": "If Google/Facebook OAuth is enabled in config, flows redirect via Feathers OAuth middleware (browser).",
+      "item": [
+        {
+          "name": "Example — start Google (browser)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/oauth/google",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "oauth",
+                "google"
+              ]
+            },
+            "description": "Open in browser when OAuth is configured; not a JSON API."
+          }
+        },
+        {
+          "name": "Example — start Facebook (browser)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/oauth/facebook",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": [
+                "oauth",
+                "facebook"
+              ]
+            },
+            "description": ""
+          }
+        }
+      ]
+    },
+    {
+      "name": "Root / static",
+      "description": "Koa `serveStatic` — may return files from `public/`.",
+      "item": [
+        {
+          "name": "GET /",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{apiProtocol}}://{{apiHost}}:{{apiPort}}/",
+              "protocol": "{{apiProtocol}}",
+              "host": [
+                "{{apiHost}}"
+              ],
+              "port": "{{apiPort}}",
+              "path": []
+            },
+            "description": "Empty path = base URL + /"
+          }
+        }
+      ]
+    }
+  ]
+}
