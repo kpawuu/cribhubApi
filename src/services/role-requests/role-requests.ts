@@ -3,6 +3,7 @@ import { errors } from '@feathersjs/errors'
 import type { Application, HookContext } from '../../declarations'
 import { authenticateIfExternal } from '../../hooks/authenticate-if-external'
 import { requireRole } from '../../hooks/require-role'
+import { populateRoles } from '../../hooks/populate-roles'
 import { createUserNotification } from '../../utils/create-user-notification'
 
 import { RoleRequestsService, getOptions } from './role-requests.class'
@@ -181,8 +182,8 @@ export const roleRequests = (app: Application) => {
       all: [schemaHooks.validateQuery(roleRequestQueryValidator), schemaHooks.resolveQuery(roleRequestQueryResolver)],
 
       // Users can see their own requests; admins see all
-      find: [authenticateIfExternal('jwt'), restrictFindToSelfOrAdmin],
-      get: [authenticateIfExternal('jwt'), restrictFindToSelfOrAdmin],
+      find: [authenticateIfExternal('jwt'), populateRoles, restrictFindToSelfOrAdmin],
+      get: [authenticateIfExternal('jwt'), populateRoles, restrictFindToSelfOrAdmin],
 
       create: [
         authenticateIfExternal('jwt'),
