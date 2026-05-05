@@ -114,31 +114,37 @@ const emailRecipientOnNotificationCreated = async (context: HookContext) => {
     if (!to) return context
     if ((recipient as any)?.emailNotifications === false) return context
 
-    const appName = process.env.APP_NAME || 'RentFlow'
+    const appName = process.env.APP_NAME || 'CribHub'
+    const recipientName = escapeHtml(String((recipient as any).fullName || 'there'))
     const safeTitle = escapeHtml(String(n.title))
-    const safeBody = n.body ? escapeHtml(String(n.body)).replace(/\n/g, '<br/>') : ''
-    const inner = [
-      `Hello ${escapeHtml(String((recipient as any).fullName || 'there'))},`,
-      ``,
-      `<b>${safeTitle}</b>`,
-      safeBody ? `<p style="margin-top:12px;">${safeBody}</p>` : ''
-    ].join('')
+    const safeBody  = n.body ? escapeHtml(String(n.body)).replace(/\n/g, '<br/>') : ''
+    const ctaUrl    = n.linkUrl ? String(n.linkUrl) : undefined
 
-    const html = await emailMessage(inner, n.linkUrl ? String(n.linkUrl) : undefined)
+    const inner = `
+      <p style="margin:0 0 16px;font-size:15px;color:#374151;">
+        Hi <strong>${recipientName}</strong>,
+      </p>
+      <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:#111827;">
+        ${safeTitle}
+      </p>
+      ${safeBody ? `<p style="margin:12px 0 0;font-size:14px;color:#4b5563;line-height:1.7;">${safeBody}</p>` : ''}
+    `
+
+    const html = await emailMessage(inner, ctaUrl, 'View in CribHub')
 
     const textLines = [
-      `Hello ${String((recipient as any).fullName || 'there')},`,
+      `Hi ${String((recipient as any).fullName || 'there')},`,
       '',
       String(n.title),
       n.body ? String(n.body) : '',
-      n.linkUrl ? `\nOpen: ${String(n.linkUrl)}` : ''
+      ctaUrl ? `\nView: ${ctaUrl}` : ''
     ].filter((line, i, arr) => !(line === '' && (arr[i - 1] === '' || i === 0)))
 
     await context.app.service('mailer').create(
       {
         from: mailFrom(),
         to,
-        subject: `${appName}: ${String(n.title).slice(0, 120)}`,
+        subject: `${String(n.title).slice(0, 120)} — ${appName}`,
         html,
         text: textLines.join('\n')
       },

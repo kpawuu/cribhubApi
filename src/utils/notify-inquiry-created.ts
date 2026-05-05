@@ -93,7 +93,7 @@ export async function notifyInquiryCreated(app: Application, inquiry: Record<str
 
     if (landlordEmail) {
       const msg = `${htmlBase}<br/><br/>You can review and update the lead status in ${appName}.`
-      await sendEmail(landlordEmail, `${appName}: new inquiry`, await emailMessage(msg, dashboardUrl))
+      await sendEmail(landlordEmail, `New inquiry on your listing — ${appName}`, await emailMessage(msg, dashboardUrl, 'View Inquiry'))
     }
     if (landlordPhone) {
       await sendSms(
@@ -114,7 +114,7 @@ export async function notifyInquiryCreated(app: Application, inquiry: Record<str
       }
       if (agentEmail) {
         const msg = `${htmlBase}<br/><br/>This lead is routed to you as the assigned agent.`
-        await sendEmail(agentEmail, `${appName}: new inquiry (assigned)`, await emailMessage(msg, dashboardUrl))
+        await sendEmail(agentEmail, `New assigned inquiry — ${appName}`, await emailMessage(msg, dashboardUrl, 'View Inquiry'))
       }
       if (agentPhone) {
         await sendSms(agentPhone, `${appName}: New assigned inquiry — ${propertyName || 'property'}.`)
