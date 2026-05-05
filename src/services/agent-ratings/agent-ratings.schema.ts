@@ -43,8 +43,25 @@ export const agentRatingDataSchema = Type.Object(
 export type AgentRatingData = Static<typeof agentRatingDataSchema>
 export const agentRatingDataValidator = getValidator(agentRatingDataSchema, dataValidator)
 export const agentRatingDataResolver = resolve<AgentRating, HookContext>({
+  // userId and reviewerName are set here (after validateData) so they do not
+  // trigger additionalProperties validation failure on agentRatingDataSchema.
+  userId: async (_value, _record, context) => {
+    const user = context.params?.user as any
+    return user?._id?.toString() ?? ''
+  },
+  reviewerName: async (value, _record, context) => {
+    if (value) return value
+    const user = context.params?.user as any
+    return (
+      user?.fullName ||
+      user?.displayName ||
+      user?.name ||
+      user?.email ||
+      'Anonymous'
+    )
+  },
   createdAt: async () => new Date().toISOString(),
-  updatedAt: async () => new Date().toISOString()
+  updatedAt: async () => new Date().toISOString(),
 })
 
 // ──────────────────────────────────────────────

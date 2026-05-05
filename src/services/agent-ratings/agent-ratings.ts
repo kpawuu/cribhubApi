@@ -68,11 +68,12 @@ const attachUserAndEnforceUnique = async (context: HookContext): Promise<HookCon
   const user = context.params.user as any
   if (!user?._id) throw new errors.NotAuthenticated()
 
-  const userId = user._id.toString()
-  ;(context.data as any).userId = userId
-  ;(context.data as any).reviewerName =
-    (context.data as any).reviewerName || user.displayName || user.name || user.email || 'Anonymous'
+  // NOTE: do NOT touch context.data here — agentRatingDataSchema has
+  // additionalProperties: false, so any extra field (e.g. userId) added
+  // before validateData will fail validation.  userId is injected by the
+  // resolver (agentRatingDataResolver) which runs after validation.
 
+  const userId = user._id.toString()
   const agentProfileId = (context.data as any).agentProfileId
   if (!agentProfileId) throw new errors.BadRequest('agentProfileId is required')
 
