@@ -6,5 +6,10 @@ export declare const getPmAssignedPropertyIds: (context: HookContext, managerUse
  * Landlord hub passes `pmPortfolio: true` so managers only see properties they manage.
  */
 export declare const restrictPropertyManagerPropertiesFind: (context: HookContext) => Promise<HookContext>;
+/**
+ * Agent-only users: portfolio `find` is limited to assigned properties.
+ * Landlord hub passes `agentPortfolio: true` so agents only see properties they represent.
+ */
+export declare const restrictAgentPropertiesFind: (context: HookContext) => Promise<HookContext>;
 export declare const requirePmAssignedToProperty: (propertyId: string) => (context: HookContext) => Promise<HookContext>;
 export declare const restrictUnitsToAssignedPropertiesForPm: (context: HookContext) => Promise<HookContext>;

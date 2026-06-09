@@ -32,6 +32,7 @@ export declare const refreshTokensSchema: import("@feathersjs/typebox").TObject<
         isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        smsNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
         userRoles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TObject<{
@@ -60,6 +61,7 @@ export declare const refreshTokensResolver: import("@feathersjs/schema").Resolve
         isOnboarded?: boolean | undefined;
         onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
+        smsNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
             _id?: string | undefined;
@@ -101,6 +103,7 @@ export declare const refreshTokensExternalResolver: import("@feathersjs/schema")
         isOnboarded?: boolean | undefined;
         onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
+        smsNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
             _id?: string | undefined;
@@ -157,6 +160,7 @@ export declare const refreshTokensDataSchema: import("@feathersjs/typebox").TPic
         isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        smsNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
         userRoles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TObject<{
@@ -185,6 +189,7 @@ export declare const refreshTokensDataResolver: import("@feathersjs/schema").Res
         isOnboarded?: boolean | undefined;
         onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
+        smsNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
             _id?: string | undefined;
@@ -241,6 +246,7 @@ export declare const refreshTokensPatchSchema: import("@feathersjs/typebox").TPa
         isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        smsNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
         userRoles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TObject<{
@@ -269,6 +275,7 @@ export declare const refreshTokensPatchResolver: import("@feathersjs/schema").Re
         isOnboarded?: boolean | undefined;
         onboarding?: {} | undefined;
         emailNotifications?: boolean | undefined;
+        smsNotifications?: boolean | undefined;
         roles?: string[] | undefined;
         userRoles?: {
             _id?: string | undefined;
@@ -325,6 +332,7 @@ export declare const refreshTokensQueryProperties: import("@feathersjs/typebox")
         isOnboarded: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
         emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        smsNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
         files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
         roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
         userRoles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TObject<{

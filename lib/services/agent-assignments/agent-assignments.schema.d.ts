@@ -7,12 +7,56 @@ export declare const agentAssignmentSchema: import("@feathersjs/typebox").TObjec
     assignedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     commissionPercent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     agreementNote: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Final agreed fee terms (copied from the source listing request's acceptedTerms). */
+    acceptedTerms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    sourceRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
+    /** Virtual: full agent profile (loaded on demand via ?include=agent). */
+    agent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
 }>;
 export type AgentAssignment = Static<typeof agentAssignmentSchema>;
 export declare const agentAssignmentValidator: import("@feathersjs/schema").Validator<any, any>;
 export declare const agentAssignmentResolver: import("@feathersjs/schema").Resolver<{
+    agent?: any;
     assignedBy?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    sourceRequestId?: string | undefined;
     commissionPercent?: number | undefined;
     agreementNote?: string | undefined;
     _id: string | {};
@@ -21,7 +65,28 @@ export declare const agentAssignmentResolver: import("@feathersjs/schema").Resol
     agentUserId: string;
 }, HookContext>;
 export declare const agentAssignmentExternalResolver: import("@feathersjs/schema").Resolver<{
+    agent?: any;
     assignedBy?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    sourceRequestId?: string | undefined;
     commissionPercent?: number | undefined;
     agreementNote?: string | undefined;
     _id: string | {};
@@ -34,11 +99,52 @@ export declare const agentAssignmentDataSchema: import("@feathersjs/typebox").TO
     agentUserId: import("@feathersjs/typebox").TString<string>;
     commissionPercent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     agreementNote: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    acceptedTerms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    sourceRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
 }>;
 export type AgentAssignmentData = Static<typeof agentAssignmentDataSchema>;
 export declare const agentAssignmentDataValidator: import("@feathersjs/schema").Validator<any, any>;
 export declare const agentAssignmentDataResolver: import("@feathersjs/schema").Resolver<{
+    agent?: any;
     assignedBy?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    sourceRequestId?: string | undefined;
     commissionPercent?: number | undefined;
     agreementNote?: string | undefined;
     _id: string | {};
@@ -46,19 +152,54 @@ export declare const agentAssignmentDataResolver: import("@feathersjs/schema").R
     propertyId: string;
     agentUserId: string;
 }, HookContext>;
-export declare const agentAssignmentPatchSchema: import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TOmit<import("@feathersjs/typebox").TObject<{
-    _id: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
-    propertyId: import("@feathersjs/typebox").TString<string>;
-    agentUserId: import("@feathersjs/typebox").TString<string>;
-    assignedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+export declare const agentAssignmentPatchSchema: import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TObject<{
     commissionPercent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     agreementNote: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
-    createdAt: import("@feathersjs/typebox").TString<"date-time">;
-}>, ["_id", "createdAt"]>>;
+    acceptedTerms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+}>>;
 export type AgentAssignmentPatch = Static<typeof agentAssignmentPatchSchema>;
 export declare const agentAssignmentPatchValidator: import("@feathersjs/schema").Validator<any, any>;
 export declare const agentAssignmentPatchResolver: import("@feathersjs/schema").Resolver<{
+    agent?: any;
     assignedBy?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    sourceRequestId?: string | undefined;
     commissionPercent?: number | undefined;
     agreementNote?: string | undefined;
     _id: string | {};
@@ -73,7 +214,30 @@ export declare const agentAssignmentQueryProperties: import("@feathersjs/typebox
     assignedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     commissionPercent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     agreementNote: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Final agreed fee terms (copied from the source listing request's acceptedTerms). */
+    acceptedTerms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    sourceRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
+    /** Virtual: full agent profile (loaded on demand via ?include=agent). */
+    agent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
 }>, ["_id", "propertyId", "agentUserId", "commissionPercent", "createdAt"]>;
 export declare const agentAssignmentQuerySchema: import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TObject<{
     $limit: import("@feathersjs/typebox").TNumber;

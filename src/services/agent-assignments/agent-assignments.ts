@@ -6,6 +6,8 @@ import type { Application, HookContext } from '../../declarations'
 import { authenticateIfExternal } from '../../hooks/authenticate-if-external'
 import { requireRole } from '../../hooks/require-role'
 import { populateRoles } from '../../hooks/populate-roles'
+import { createUserNotification } from '../../utils/create-user-notification'
+import { findOrCreateThread } from '../threads/threads'
 
 import { AgentAssignmentsService, getOptions } from './agent-assignments.class'
 import {
@@ -40,6 +42,46 @@ const syncPropertyAgentOnCreate = async (context: HookContext) => {
   } catch (err: any) {
     ;(context.app as any).logger?.warn?.('syncPropertyAgentOnCreate failed', err?.message)
   }
+  return context
+}
+
+const appUrl = () => (process.env.APP_URL || '').replace(/\/$/, '')
+
+/** After create: welcome notification + provision thread if not already created. */
+const welcomeAgentOnAssignment = async (context: HookContext) => {
+  const r = context.result as any
+  if (!r?.agentUserId || !r?.propertyId) return context
+  if (r.sourceRequestId) return context
+  try {
+    const prop = await context.app
+      .service('properties')
+      .get(String(r.propertyId), { provider: undefined } as any)
+      .catch(() => null)
+    const landlordId = String((prop as any)?.landlordId || '')
+    await createUserNotification(context.app, {
+      userId: String(r.agentUserId),
+      eventKey: 'agent_assignment.created',
+      category: 'assignment',
+      title: 'You were assigned to represent a property',
+      body: (prop as any)?.name
+        ? `You are now the agent for "${(prop as any).name}". Open the listing to coordinate with the landlord.`
+        : 'You are now the agent for this property. Open it to coordinate with the landlord.',
+      linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}`,
+      relatedService: 'agent-assignments',
+      relatedId: String(r._id),
+      metadata: { propertyId: r.propertyId }
+    })
+    if (landlordId) {
+      await findOrCreateThread(context.app, {
+        kind: 'landlord-agent',
+        participantIds: [landlordId, String(r.agentUserId)],
+        subject: { type: 'property', id: String(r.propertyId) },
+        propertyId: String(r.propertyId),
+        title: (prop as any)?.name ? `Represent: ${(prop as any).name}` : 'Property representation',
+        systemNote: 'You are now connected. Use this thread to coordinate on this listing.'
+      })
+    }
+  } catch {}
   return context
 }
 
@@ -193,7 +235,7 @@ export const agentAssignments = (app: Application) => {
       remove: [authenticateIfExternal('jwt'), requireRole('landlord', 'admin')]
     },
     after: {
-      create: [syncPropertyAgentOnCreate],
+      create: [syncPropertyAgentOnCreate, welcomeAgentOnAssignment],
       remove: [clearPropertyAgentOnRemove]
     }
   })

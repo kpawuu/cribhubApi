@@ -37,6 +37,8 @@ export declare const userSchema: import("@feathersjs/typebox").TObject<{
     onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
     /** When false, in-app notifications are still created but notification emails are skipped. */
     emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** When false, transactional SMS notifications are skipped. */
+    smsNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
     /** Role names (virtual — from `user-roles`). */
     roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
@@ -60,6 +62,7 @@ export declare const userResolver: import("@feathersjs/schema").Resolver<{
     isOnboarded?: boolean | undefined;
     onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
+    smsNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {
         _id?: string | undefined;
@@ -92,6 +95,7 @@ export declare const userExternalResolver: import("@feathersjs/schema").Resolver
     isOnboarded?: boolean | undefined;
     onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
+    smsNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {
         _id?: string | undefined;
@@ -140,6 +144,7 @@ export declare const userDataResolver: import("@feathersjs/schema").Resolver<{
     isOnboarded?: boolean | undefined;
     onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
+    smsNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {
         _id?: string | undefined;
@@ -188,6 +193,8 @@ export declare const userPatchSchema: import("@feathersjs/typebox").TPartial<imp
     onboarding: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{}>>;
     /** When false, in-app notifications are still created but notification emails are skipped. */
     emailNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** When false, transactional SMS notifications are skipped. */
+    smsNotifications: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
     /** Role names (virtual — from `user-roles`). */
     roles: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>>;
@@ -211,6 +218,7 @@ export declare const userPatchResolver: import("@feathersjs/schema").Resolver<{
     isOnboarded?: boolean | undefined;
     onboarding?: {} | undefined;
     emailNotifications?: boolean | undefined;
+    smsNotifications?: boolean | undefined;
     roles?: string[] | undefined;
     userRoles?: {
         _id?: string | undefined;

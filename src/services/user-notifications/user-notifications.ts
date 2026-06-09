@@ -6,6 +6,7 @@ import { authenticateIfExternal } from '../../hooks/authenticate-if-external'
 import { populateRoles } from '../../hooks/populate-roles'
 import { restrictQueryToOwner } from '../../hooks/restrict-query-to-owner'
 import emailMessage from '../../utils/emailMessage'
+import { renderEmailParts, renderSmsBody } from '../../utils/notification-templates'
 import { UserNotificationsService, getOptions } from './user-notifications.class'
 import {
   userNotificationResolver,
@@ -58,8 +59,20 @@ const blockExternalCreateUnlessAdmin = async (context: HookContext) => {
 const smtpConfigured = () =>
   Boolean(process.env.MAIL_HOST && process.env.MAIL_USERNAME && process.env.MAIL_PASSWORD)
 
+const smsConfigured = () => Boolean(process.env.MNOTIFY_API_KEY)
+
 const notificationEmailsGloballyDisabled = () =>
   String(process.env.NOTIFICATION_EMAIL_DISABLED || '').toLowerCase() === 'true'
+
+const notificationSmsGloballyDisabled = () =>
+  String(process.env.NOTIFICATION_SMS_DISABLED || '').toLowerCase() === 'true'
+
+const normalizePhone = (raw: string | undefined | null): string | null => {
+  if (!raw) return null
+  const cleaned = String(raw).replace(/[\s()-]/g, '')
+  if (!/^\+?\d{7,15}$/.test(cleaned)) return null
+  return cleaned.startsWith('+') ? cleaned : cleaned
+}
 
 /**
  * Turns virtual list filters into Mongo clauses (and removes virtual keys) before the adapter runs.
@@ -94,12 +107,10 @@ const mailFrom = () => {
   return `"${appName}" <${process.env.MAIL_SENT_FROM || process.env.MAIL_USERNAME || 'no-reply@localhost'}>`
 }
 
-const escapeHtml = (s: string) =>
-  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-
 /**
- * After each persisted notification, email the recipient (same SMTP guard as auth mailer).
- * Failures are logged only so notification creation always succeeds.
+ * After each persisted notification, email the recipient (when configured)
+ * using the template registry. Failures are logged only so notification
+ * creation always succeeds.
  */
 const emailRecipientOnNotificationCreated = async (context: HookContext) => {
   const n = context.result as any
@@ -114,37 +125,36 @@ const emailRecipientOnNotificationCreated = async (context: HookContext) => {
     if (!to) return context
     if ((recipient as any)?.emailNotifications === false) return context
 
-    const appName = process.env.APP_NAME || 'CribHub'
-    const recipientName = escapeHtml(String((recipient as any).fullName || 'there'))
-    const safeTitle = escapeHtml(String(n.title))
-    const safeBody  = n.body ? escapeHtml(String(n.body)).replace(/\n/g, '<br/>') : ''
-    const ctaUrl    = n.linkUrl ? String(n.linkUrl) : undefined
+    const parts = renderEmailParts(
+      {
+        userId: String(n.userId),
+        eventKey: String(n.eventKey || ''),
+        category: String(n.category || ''),
+        title: String(n.title),
+        body: n.body ? String(n.body) : undefined,
+        linkUrl: n.linkUrl ? String(n.linkUrl) : undefined,
+        relatedService: n.relatedService ? String(n.relatedService) : undefined,
+        relatedId: n.relatedId ? String(n.relatedId) : undefined,
+        metadata: (n.metadata || null) as any
+      },
+      String((recipient as any).fullName || 'there')
+    )
 
-    const inner = `
-      <p style="margin:0 0 16px;font-size:15px;color:#374151;">
-        Hi <strong>${recipientName}</strong>,
-      </p>
-      <p style="margin:0 0 8px;font-size:17px;font-weight:700;color:#111827;">
-        ${safeTitle}
-      </p>
-      ${safeBody ? `<p style="margin:12px 0 0;font-size:14px;color:#4b5563;line-height:1.7;">${safeBody}</p>` : ''}
-    `
-
-    const html = await emailMessage(inner, ctaUrl, 'View in CribHub')
+    const html = await emailMessage(parts.innerHtml, parts.ctaUrl, parts.ctaLabel)
 
     const textLines = [
       `Hi ${String((recipient as any).fullName || 'there')},`,
       '',
-      String(n.title),
+      parts.heading,
       n.body ? String(n.body) : '',
-      ctaUrl ? `\nView: ${ctaUrl}` : ''
+      parts.ctaUrl ? `\nOpen: ${parts.ctaUrl}` : ''
     ].filter((line, i, arr) => !(line === '' && (arr[i - 1] === '' || i === 0)))
 
     await context.app.service('mailer').create(
       {
         from: mailFrom(),
         to,
-        subject: `${String(n.title).slice(0, 120)} — ${appName}`,
+        subject: String(parts.subject).slice(0, 160),
         html,
         text: textLines.join('\n')
       },
@@ -155,6 +165,46 @@ const emailRecipientOnNotificationCreated = async (context: HookContext) => {
     console.warn('[user-notifications] Email to recipient failed', e)
   }
 
+  return context
+}
+
+/**
+ * After each persisted notification, send a transactional SMS to the recipient
+ * when their phone is on file and SMS is enabled.
+ */
+const smsRecipientOnNotificationCreated = async (context: HookContext) => {
+  const n = context.result as any
+  if (!n?.userId || !n?.title) return context
+  if ((context.params as any).skipNotificationSms) return context
+  if (notificationSmsGloballyDisabled()) return context
+  if (!smsConfigured()) return context
+
+  try {
+    const recipient = await context.app.service('users').get(n.userId, { provider: undefined } as any)
+    const r = recipient as any
+    if (r?.smsNotifications === false) return context
+    const phone = normalizePhone(r?.phone)
+    if (!phone) return context
+
+    const text = renderSmsBody({
+      userId: String(n.userId),
+      eventKey: String(n.eventKey || ''),
+      category: String(n.category || ''),
+      title: String(n.title),
+      body: n.body ? String(n.body) : undefined,
+      linkUrl: n.linkUrl ? String(n.linkUrl) : undefined,
+      metadata: (n.metadata || null) as any
+    })
+    if (!text) return context
+
+    await context.app.service('sms').create(
+      { recipient: [phone], message: text },
+      { provider: undefined } as any
+    )
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[user-notifications] SMS to recipient failed', e)
+  }
   return context
 }
 
@@ -225,7 +275,7 @@ export const userNotifications = (app: Application) => {
       ]
     },
     after: {
-      create: [emailRecipientOnNotificationCreated]
+      create: [emailRecipientOnNotificationCreated, smsRecipientOnNotificationCreated]
     }
   })
 }

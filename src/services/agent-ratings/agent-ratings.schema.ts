@@ -16,6 +16,11 @@ export const agentRatingSchema = Type.Object(
     rating: Type.Number({ minimum: 1, maximum: 5 }),
     comment: Type.Optional(Type.String({ maxLength: 1000 })),
     reviewerName: Type.Optional(Type.String()),
+    /** Admin moderation: when true, review is hidden from public listings (only admin/owner sees it). */
+    hidden: Type.Optional(Type.Boolean()),
+    hiddenAt: Type.Optional(Type.String({ format: 'date-time' })),
+    hiddenBy: Type.Optional(Type.String()),
+    moderationNote: Type.Optional(Type.String({ maxLength: 1000 })),
     createdAt: Type.String({ format: 'date-time' }),
     updatedAt: Type.Optional(Type.String({ format: 'date-time' }))
   },
@@ -70,7 +75,14 @@ export const agentRatingDataResolver = resolve<AgentRating, HookContext>({
 export const agentRatingPatchSchema = Type.Object(
   {
     rating: Type.Optional(Type.Number({ minimum: 1, maximum: 5 })),
-    comment: Type.Optional(Type.String({ maxLength: 1000 }))
+    comment: Type.Optional(Type.String({ maxLength: 1000 })),
+    /** Admin-only: toggle moderation visibility. */
+    hidden: Type.Optional(Type.Boolean()),
+    /** Admin-only: timestamped when admin toggles `hidden`. */
+    hiddenAt: Type.Optional(Type.Union([Type.String({ format: 'date-time' }), Type.Null()])),
+    /** Admin-only: stamped to the moderator user id. */
+    hiddenBy: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+    moderationNote: Type.Optional(Type.String({ maxLength: 1000 }))
   },
   { $id: 'AgentRatingPatch', additionalProperties: false }
 )
@@ -89,6 +101,7 @@ export const agentRatingQueryProperties = Type.Pick(agentRatingSchema, [
   'agentProfileId',
   'userId',
   'rating',
+  'hidden',
   'createdAt'
 ])
 

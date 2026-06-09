@@ -7,7 +7,11 @@ import { authenticateIfJwtPresent } from '../../hooks/authenticate-if-jwt-presen
 import { requireRole } from '../../hooks/require-role'
 import { populateRoles } from '../../hooks/populate-roles'
 import { requireAgentAssignedToProperty } from '../../hooks/agent-assignment-access'
-import { restrictPropertyManagerPropertiesFind, requirePmAssignedToProperty } from '../../hooks/pm-assignment-access'
+import {
+  restrictPropertyManagerPropertiesFind,
+  restrictAgentPropertiesFind,
+  requirePmAssignedToProperty
+} from '../../hooks/pm-assignment-access'
 
 import { PropertiesService, getOptions } from './properties.class'
 import { expandListingQuery } from './expand-listing-query'
@@ -152,6 +156,7 @@ export const properties = (app: Application) => {
         populateRolesIfAuthed,
         restrictLandlordPropertyQueries,
         restrictPropertyManagerPropertiesFind,
+        restrictAgentPropertiesFind,
         extractInclude
       ],
       get: [authenticateIfJwtPresent(), populateRolesIfAuthed, restrictPropertyGet, extractInclude],

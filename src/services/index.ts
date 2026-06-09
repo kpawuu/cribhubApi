@@ -30,6 +30,11 @@ import { agentListingRequests } from './agent-listing-requests/agent-listing-req
 import { agentRatings } from './agent-ratings/agent-ratings'
 import { propertyManagerAssignments } from './property-manager-assignments/property-manager-assignments'
 import { propertyManagerListingRequests } from './property-manager-listing-requests/property-manager-listing-requests'
+import { propertyManagerProfiles } from './property-manager-profiles/property-manager-profiles'
+import { pmRatings } from './pm-ratings/pm-ratings'
+import { agentPayouts } from './agent-payouts/agent-payouts'
+import { pmPayouts } from './pm-payouts/pm-payouts'
+import { threads } from './threads/threads'
 import { inquiries } from './inquiries/inquiries'
 import { chatMessages } from './chat-messages/chat-messages'
 import { favorites } from './favorites/favorites'
@@ -37,6 +42,7 @@ import { dashboard } from './dashboard/dashboard'
 import { listingSidebar } from './listing-sidebar/listing-sidebar'
 import { userNotifications } from './user-notifications/user-notifications'
 import { adminBootstrap } from './admin-bootstrap/admin-bootstrap'
+import { adminMigrations } from './admin-migrations/admin-migrations'
 import { sitePages } from './site-pages/site-pages'
 import { registerUserNotificationTriggers } from '../user-notification-triggers'
 
@@ -69,8 +75,13 @@ export const services = (app: Application) => {
   app.configure(agentAssignments)
   app.configure(agentListingRequests)
   app.configure(agentRatings)
+  app.configure(propertyManagerProfiles)
+  app.configure(pmRatings)
   app.configure(propertyManagerAssignments)
   app.configure(propertyManagerListingRequests)
+  app.configure(agentPayouts)
+  app.configure(pmPayouts)
+  app.configure(threads)
   app.configure(inquiries)
   app.configure(chatMessages)
   app.configure(favorites)
@@ -78,6 +89,7 @@ export const services = (app: Application) => {
   app.configure(dashboard)
   app.configure(listingSidebar)
   app.configure(adminBootstrap)
+  app.configure(adminMigrations)
   app.configure(sitePages)
 
   registerUserNotificationTriggers(app)

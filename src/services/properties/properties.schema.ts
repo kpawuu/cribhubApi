@@ -257,7 +257,9 @@ const listingVirtualQuery = Type.Object(
     type: Type.Optional(Type.Union([Type.Literal('buy'), Type.Literal('rent'), Type.Literal('commercial'), Type.Literal('new')])),
     superAgent: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
     /** PM-only: when true, `properties.find` is scoped to assigned properties (portfolio hub). Omit for public catalog. */
-    pmPortfolio: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
+    pmPortfolio: Type.Optional(Type.Union([Type.Boolean(), Type.String()])),
+    /** Agent-only: when true, `properties.find` is scoped to assigned properties. */
+    agentPortfolio: Type.Optional(Type.Union([Type.Boolean(), Type.String()]))
   },
   { additionalProperties: true }
 )

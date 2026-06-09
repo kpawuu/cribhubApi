@@ -11,6 +11,12 @@ export declare const roleRequestSchema: import("@feathersjs/typebox").TObject<{
     reviewedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
+    /** Virtual: basic applicant info (loaded via ?include=applicant). */
+    applicant: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: role-specific profile (loaded via ?include=profile). */
+    profile: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: verification documents tied to the applicant (loaded via ?include=documents). */
+    documents: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
 }>;
 export type RoleRequest = Static<typeof roleRequestSchema>;
 export declare const roleRequestValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -19,6 +25,9 @@ export declare const roleRequestResolver: import("@feathersjs/schema").Resolver<
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    applicant?: any;
+    profile?: any;
+    documents?: any[] | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -30,6 +39,9 @@ export declare const roleRequestExternalResolver: import("@feathersjs/schema").R
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    applicant?: any;
+    profile?: any;
+    documents?: any[] | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -50,6 +62,9 @@ export declare const roleRequestDataResolver: import("@feathersjs/schema").Resol
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    applicant?: any;
+    profile?: any;
+    documents?: any[] | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -67,6 +82,12 @@ export declare const roleRequestPatchSchema: import("@feathersjs/typebox").TPart
     reviewedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
+    /** Virtual: basic applicant info (loaded via ?include=applicant). */
+    applicant: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: role-specific profile (loaded via ?include=profile). */
+    profile: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: verification documents tied to the applicant (loaded via ?include=documents). */
+    documents: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
 }>, ["_id", "userId", "role", "createdAt"]>>;
 export type RoleRequestPatch = Static<typeof roleRequestPatchSchema>;
 export declare const roleRequestPatchValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -75,6 +96,9 @@ export declare const roleRequestPatchResolver: import("@feathersjs/schema").Reso
     notes?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    applicant?: any;
+    profile?: any;
+    documents?: any[] | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;

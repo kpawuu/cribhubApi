@@ -14,6 +14,7 @@ import { authentication } from './authentication'
 import { services } from './services'
 import { channels } from './channels'
 import { logger } from './logger'
+import { stripQueryInclude } from './hooks/strip-query-include'
 
 const app: Application = koa(feathers())
 
@@ -64,6 +65,12 @@ app.configure(services)
 app.configure(channels)
 
 app.hooks({
+  before: {
+    // Pop `$include` off `params.query` and stash on `params.$include` so it never
+    // leaks into the MongoDB adapter (which would reject it as an unknown operator).
+    // Per-service externalResolvers read it via `shouldInclude(context, key)`.
+    all: [stripQueryInclude]
+  },
   error: {
     all: [
       async (context: HookContext) => {

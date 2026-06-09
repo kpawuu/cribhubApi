@@ -56,6 +56,8 @@ export const userSchema = Type.Object(
     onboarding: Type.Optional(Type.Object({}, { additionalProperties: true })),
     /** When false, in-app notifications are still created but notification emails are skipped. */
     emailNotifications: Type.Optional(Type.Boolean()),
+    /** When false, transactional SMS notifications are skipped. */
+    smsNotifications: Type.Optional(Type.Boolean()),
     files: Type.Optional(Type.Array(Type.Any())),
     /** Role names (virtual — from `user-roles`). */
     roles: Type.Optional(Type.Array(Type.String())),

@@ -5,6 +5,8 @@ import type { Application, HookContext } from '../../declarations'
 import { authenticateIfExternal } from '../../hooks/authenticate-if-external'
 import { populateRoles } from '../../hooks/populate-roles'
 import { requireRole } from '../../hooks/require-role'
+import { createUserNotification } from '../../utils/create-user-notification'
+import { findOrCreateThread } from '../threads/threads'
 
 import { PropertyManagerAssignmentsService, getOptions } from './property-manager-assignments.class'
 import {
@@ -89,6 +91,44 @@ const loadRow = async (app: Application, id: string) => {
   return db.collection('property_manager_assignments').findOne({ _id: id as any })
 }
 
+const appUrl = () => (process.env.APP_URL || '').replace(/\/$/, '')
+
+const welcomePmOnAssignment = async (context: HookContext) => {
+  const r = context.result as any
+  if (!r?.managerUserId || !r?.propertyId) return context
+  // If we came via the listing-request flow, that flow already notified the PM.
+  if (r.sourceRequestId) return context
+  try {
+    const prop = await context.app
+      .service('properties')
+      .get(String(r.propertyId), { provider: undefined } as any)
+      .catch(() => null)
+    await createUserNotification(context.app, {
+      userId: String(r.managerUserId),
+      eventKey: 'pm_assignment.created',
+      category: 'assignment',
+      title: 'You were assigned to manage a property',
+      body: (prop as any)?.name
+        ? `You can now manage "${(prop as any).name}". Open it to coordinate with the landlord.`
+        : 'You can now manage this property. Open it to coordinate with the landlord.',
+      linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}`,
+      relatedService: 'property-manager-assignments',
+      relatedId: String(r._id),
+      metadata: { propertyId: r.propertyId }
+    })
+    // Make sure landlord ↔ PM thread exists so they can talk straight away.
+    await findOrCreateThread(context.app, {
+      kind: 'landlord-pm',
+      participantIds: [String(r.landlordId), String(r.managerUserId)],
+      subject: { type: 'property', id: String(r.propertyId) },
+      propertyId: String(r.propertyId),
+      title: (prop as any)?.name ? `Manage: ${(prop as any).name}` : 'Property management',
+      systemNote: 'You are now connected. Use this thread to coordinate property management.'
+    })
+  } catch {}
+  return context
+}
+
 const assertGetOrRemove = async (context: HookContext) => {
   if (!context.params.provider) return context
   const user = context.params.user as any
@@ -137,6 +177,9 @@ export const propertyManagerAssignments = (app: Application) => {
         schemaHooks.resolveData(propertyManagerAssignmentPatchResolver)
       ],
       remove: [authenticateIfExternal('jwt'), populateRoles, assertGetOrRemove, requireRole('landlord', 'admin', 'property_manager')]
+    },
+    after: {
+      create: [welcomePmOnAssignment]
     }
   })
 }

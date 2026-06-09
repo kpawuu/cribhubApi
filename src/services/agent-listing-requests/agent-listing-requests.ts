@@ -7,6 +7,8 @@ import { mergeQuery } from '../../hooks/merge-query'
 import { populateRoles } from '../../hooks/populate-roles'
 import { requireRole } from '../../hooks/require-role'
 import { createUserNotification } from '../../utils/create-user-notification'
+import { findOrCreateThread } from '../threads/threads'
+import { deriveLegacyCommissionPercent } from '../fee-proposal-shared'
 
 import { AgentListingRequestsService, getOptions } from './agent-listing-requests.class'
 import {
@@ -80,27 +82,70 @@ const restrictPatch = async (context: HookContext) => {
   if (!prev) return context
   await assertRowAccess(context, prev)
 
-  const st = (context.data as any)?.status
-  if (!st) throw new errors.BadRequest('status is required')
+  const uid = user._id?.toString()
+  const d = context.data as any
+  const st = d?.status as string | undefined
 
   if (roles.includes('admin')) {
-    if (!['accepted', 'rejected', 'withdrawn'].includes(st)) throw new errors.BadRequest('Invalid status')
+    if (st && !['countered', 'accepted', 'rejected', 'withdrawn'].includes(st)) {
+      throw new errors.BadRequest('Invalid status')
+    }
+    if (st === 'accepted' && !d.acceptedTerms) {
+      d.acceptedTerms = prev.counter || prev.proposal || undefined
+    }
     return context
   }
 
-  const uid = user._id?.toString()
+  // Landlord: accept / reject / counter (only on pending or countered)
   if (prev.landlordId === uid) {
-    if (st !== 'accepted' && st !== 'rejected') throw new errors.Forbidden('Landlords may only accept or reject requests.')
-    if (prev.status !== 'pending') throw new errors.BadRequest('Only pending requests can be decided.')
-    ;(context.data as any).reviewedBy = uid
-    ;(context.data as any).reviewedAt = new Date().toISOString()
+    if (!st && !d.counter) throw new errors.BadRequest('Provide a status or counter')
+    if (st && !['accepted', 'rejected', 'countered'].includes(st)) {
+      throw new errors.Forbidden('Landlords may only accept, reject or counter.')
+    }
+    if (!['pending', 'countered'].includes(prev.status)) {
+      throw new errors.BadRequest(`Cannot update a request with status "${prev.status}".`)
+    }
+    if (d.counter) {
+      d.counter = { ...d.counter, proposedByUserId: uid, at: new Date().toISOString() }
+      d.status = 'countered'
+    }
+    if (st === 'accepted') {
+      d.acceptedTerms = d.acceptedTerms || prev.counter || prev.proposal || undefined
+      const cp = deriveLegacyCommissionPercent(d.acceptedTerms)
+      if (typeof cp === 'number') (d as any).commissionPercent = cp
+    }
+    d.reviewedBy = uid
+    d.reviewedAt = new Date().toISOString()
+    delete d.proposal
     return context
   }
 
+  // Agent: withdraw, accept landlord counter, or send new proposal during countered
   if (prev.agentUserId === uid) {
-    if (st !== 'withdrawn') throw new errors.Forbidden('Agents may only withdraw their own pending request.')
-    if (prev.status !== 'pending') throw new errors.BadRequest('Only pending requests can be withdrawn.')
-    return context
+    if (st === 'withdrawn') {
+      if (!['pending', 'countered'].includes(prev.status)) {
+        throw new errors.BadRequest('Only pending/countered requests can be withdrawn.')
+      }
+      return context
+    }
+    if (st === 'accepted') {
+      if (prev.status !== 'countered') throw new errors.Forbidden('No counter to accept.')
+      d.acceptedTerms = d.acceptedTerms || prev.counter || prev.proposal || undefined
+      const cp = deriveLegacyCommissionPercent(d.acceptedTerms)
+      if (typeof cp === 'number') (d as any).commissionPercent = cp
+      d.reviewedBy = uid
+      d.reviewedAt = new Date().toISOString()
+      delete d.counter
+      delete d.proposal
+      return context
+    }
+    if (d.proposal && prev.status === 'countered') {
+      d.proposal = { ...d.proposal, proposedByUserId: uid, at: new Date().toISOString() }
+      d.status = 'pending'
+      delete d.counter
+      return context
+    }
+    throw new errors.Forbidden('You can only withdraw, accept the counter, or send a new proposal.')
   }
 
   throw new errors.Forbidden('You cannot update this request.')
@@ -114,9 +159,9 @@ const preventDuplicatePending = async (context: HookContext) => {
   const dup = await db.collection('agent_listing_requests').findOne({
     propertyId: d.propertyId,
     agentUserId: d.agentUserId,
-    status: 'pending'
+    status: { $in: ['pending', 'countered'] }
   })
-  if (dup) throw new errors.BadRequest('You already have a pending request for this property.')
+  if (dup) throw new errors.BadRequest('You already have an open request for this property.')
   return context
 }
 
@@ -125,6 +170,16 @@ const preventSelfRequestAsLandlord = async (context: HookContext) => {
   const d = context.data as any
   if (d.landlordId && d.agentUserId && String(d.landlordId) === String(d.agentUserId)) {
     throw new errors.BadRequest('You cannot request your own listing.')
+  }
+  return context
+}
+
+const mirrorCommissionPercent = async (context: HookContext) => {
+  if (context.method !== 'create') return context
+  const d = context.data as any
+  if (typeof d.commissionPercent !== 'number') {
+    const derived = deriveLegacyCommissionPercent(d.proposal)
+    if (typeof derived === 'number') d.commissionPercent = derived
   }
   return context
 }
@@ -138,7 +193,7 @@ const notifyLandlordOnCreate = async (context: HookContext) => {
     category: 'assignment',
     title: 'Agent requested to represent your listing',
     body: r.message ? String(r.message).slice(0, 280) : 'An agent asked to represent one of your properties.',
-    linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}`,
+    linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}?tab=agent&request=${r._id}`,
     relatedService: 'agent-listing-requests',
     relatedId: String(r._id),
     metadata: { propertyId: r.propertyId, agentUserId: r.agentUserId }
@@ -146,10 +201,11 @@ const notifyLandlordOnCreate = async (context: HookContext) => {
   return context
 }
 
-const notifyAgentOnDecision = async (context: HookContext) => {
+const notifyOnStatusChange = async (context: HookContext) => {
   const r = context.result as any
   const prev = (context.params as any).__agentListingPrev as any
   if (!r?.agentUserId || !prev || prev.status === r.status) return context
+
   if (r.status === 'accepted') {
     await createUserNotification(context.app, {
       userId: String(r.agentUserId),
@@ -157,7 +213,7 @@ const notifyAgentOnDecision = async (context: HookContext) => {
       category: 'assignment',
       title: 'Listing request accepted',
       body: 'The landlord accepted your request to represent their property.',
-      linkUrl: `${appUrl()}/properties/${r.propertyId}`,
+      linkUrl: `${appUrl()}/agent/listings?property=${r.propertyId}`,
       relatedService: 'agent-listing-requests',
       relatedId: String(r._id)
     })
@@ -172,6 +228,28 @@ const notifyAgentOnDecision = async (context: HookContext) => {
       relatedService: 'agent-listing-requests',
       relatedId: String(r._id)
     })
+  } else if (r.status === 'countered') {
+    await createUserNotification(context.app, {
+      userId: String(r.agentUserId),
+      eventKey: 'agent_listing_request.countered',
+      category: 'assignment',
+      title: 'Landlord proposed different terms',
+      body: 'Review their counter-offer to continue.',
+      linkUrl: `${appUrl()}/agent/listings?request=${r._id}`,
+      relatedService: 'agent-listing-requests',
+      relatedId: String(r._id)
+    })
+  } else if (r.status === 'pending' && prev.status === 'countered') {
+    await createUserNotification(context.app, {
+      userId: String(r.landlordId),
+      eventKey: 'agent_listing_request.recountered',
+      category: 'assignment',
+      title: 'Agent updated their proposal',
+      body: 'Review the new fee proposal to continue.',
+      linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}?tab=agent&request=${r._id}`,
+      relatedService: 'agent-listing-requests',
+      relatedId: String(r._id)
+    })
   }
   return context
 }
@@ -181,23 +259,40 @@ const provisionAssignmentWhenAccepted = async (context: HookContext) => {
   const prev = (context.params as any).__agentListingPrev as any
   if (!r || r.status !== 'accepted' || !prev || prev.status === 'accepted') return context
 
-  const res = await context.app.service('agent-assignments').find({
+  const res = (await context.app.service('agent-assignments').find({
     query: { propertyId: r.propertyId, agentUserId: r.agentUserId, $limit: 1 },
     paginate: false,
     provider: undefined
-  } as any)
+  } as any)) as any
   const data = Array.isArray(res) ? res : []
-  if (data.length) return context
+  if (!data.length) {
+    await context.app.service('agent-assignments').create(
+      {
+        propertyId: r.propertyId,
+        agentUserId: r.agentUserId,
+        commissionPercent: r.commissionPercent,
+        agreementNote: r.message,
+        acceptedTerms: r.acceptedTerms,
+        sourceRequestId: String(r._id)
+      } as any,
+      { provider: undefined } as any
+    )
+  }
 
-  await context.app.service('agent-assignments').create(
-    {
-      propertyId: r.propertyId,
-      agentUserId: r.agentUserId,
-      commissionPercent: r.commissionPercent,
-      agreementNote: r.message
-    } as any,
-    { provider: undefined } as any
-  )
+  try {
+    const prop = await context.app
+      .service('properties')
+      .get(String(r.propertyId), { provider: undefined } as any)
+      .catch(() => null)
+    await findOrCreateThread(context.app, {
+      kind: 'landlord-agent',
+      participantIds: [String(r.landlordId), String(r.agentUserId)],
+      subject: { type: 'property', id: String(r.propertyId) },
+      propertyId: String(r.propertyId),
+      title: (prop as any)?.name ? `Represent: ${(prop as any).name}` : 'Property representation',
+      systemNote: 'You are now connected. Use this thread to coordinate listing & commission details.'
+    })
+  } catch {}
   return context
 }
 
@@ -245,6 +340,7 @@ export const agentListingRequests = (app: Application) => {
         stripNonAdminAgentUserId,
         schemaHooks.validateData(agentListingRequestDataValidator),
         schemaHooks.resolveData(agentListingRequestDataResolver),
+        mirrorCommissionPercent,
         preventDuplicatePending,
         preventSelfRequestAsLandlord
       ],
@@ -260,7 +356,7 @@ export const agentListingRequests = (app: Application) => {
     },
     after: {
       create: [notifyLandlordOnCreate],
-      patch: [provisionAssignmentWhenAccepted, notifyAgentOnDecision]
+      patch: [provisionAssignmentWhenAccepted, notifyOnStatusChange]
     }
   })
 }

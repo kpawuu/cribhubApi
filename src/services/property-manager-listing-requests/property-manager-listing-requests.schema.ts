@@ -1,13 +1,15 @@
-import { resolve } from '@feathersjs/schema'
+import { resolve, virtual } from '@feathersjs/schema'
 import { Type, getValidator, querySyntax, ObjectIdSchema } from '@feathersjs/typebox'
 import type { Static } from '@feathersjs/typebox'
 
 import { errors } from '@feathersjs/errors'
 import type { HookContext } from '../../declarations'
 import { dataValidator, queryValidator } from '../../validators'
+import { feeProposalSchema, deriveLegacyCommissionPercent } from '../fee-proposal-shared'
 
 export const pmListingRequestStatusSchema = Type.Union([
   Type.Literal('pending'),
+  Type.Literal('countered'),
   Type.Literal('accepted'),
   Type.Literal('rejected'),
   Type.Literal('withdrawn')
@@ -21,10 +23,22 @@ export const propertyManagerListingRequestSchema = Type.Object(
     landlordId: Type.String(),
     message: Type.Optional(Type.String({ maxLength: 4000 })),
     status: pmListingRequestStatusSchema,
+    /** Initial fee proposal from the PM. */
+    proposal: Type.Optional(feeProposalSchema),
+    /** Landlord counter-offer (present when status = 'countered'). */
+    counter: Type.Optional(feeProposalSchema),
+    /** Final agreed terms (set when status moves to 'accepted'). */
+    acceptedTerms: Type.Optional(feeProposalSchema),
     reviewedBy: Type.Optional(Type.String()),
     reviewedAt: Type.Optional(Type.String({ format: 'date-time' })),
     createdAt: Type.String({ format: 'date-time' }),
-    updatedAt: Type.Optional(Type.String({ format: 'date-time' }))
+    updatedAt: Type.Optional(Type.String({ format: 'date-time' })),
+    /** Virtual: full property manager profile (loaded on demand via ?include=manager). */
+    manager: Type.Optional(Type.Any()),
+    /** Virtual: property snapshot. */
+    property: Type.Optional(Type.Any()),
+    /** Virtual: lightweight thread between landlord & manager, when one exists. */
+    thread: Type.Optional(Type.Any())
   },
   { $id: 'PropertyManagerListingRequest', additionalProperties: false }
 )
@@ -32,12 +46,60 @@ export const propertyManagerListingRequestSchema = Type.Object(
 export type PropertyManagerListingRequest = Static<typeof propertyManagerListingRequestSchema>
 export const propertyManagerListingRequestValidator = getValidator(propertyManagerListingRequestSchema, dataValidator)
 export const propertyManagerListingRequestResolver = resolve<PropertyManagerListingRequest, HookContext>({})
-export const propertyManagerListingRequestExternalResolver = resolve<PropertyManagerListingRequest, HookContext>({})
+
+async function shouldInclude(context: HookContext, key: string): Promise<boolean> {
+  const inc = (context.params as any)?.$include ?? (context.params?.query as any)?.$include
+  if (!inc) return false
+  if (typeof inc === 'string') return inc.split(',').map((s) => s.trim()).includes(key)
+  if (Array.isArray(inc)) return inc.includes(key)
+  return false
+}
+
+export const propertyManagerListingRequestExternalResolver = resolve<PropertyManagerListingRequest, HookContext>({
+  manager: virtual(async (row, context) => {
+    if (!(await shouldInclude(context, 'manager'))) return undefined
+    const uid = String((row as any).managerUserId || '')
+    if (!uid) return undefined
+    try {
+      const res = (await context.app.service('property-manager-profiles').find({
+        query: { userId: uid, $limit: 1 },
+        paginate: false,
+        provider: undefined
+      } as any)) as any
+      const arr = Array.isArray(res) ? res : res?.data || []
+      return arr[0] || null
+    } catch {
+      return null
+    }
+  }),
+  property: virtual(async (row, context) => {
+    if (!(await shouldInclude(context, 'property'))) return undefined
+    const pid = String((row as any).propertyId || '')
+    if (!pid) return undefined
+    try {
+      return await context.app.service('properties').get(pid, { provider: undefined } as any)
+    } catch {
+      return null
+    }
+  }),
+  thread: virtual(async (row, context) => {
+    if (!(await shouldInclude(context, 'thread'))) return undefined
+    const db = await context.app.get('mongodbClient')
+    const t = await db.collection('threads').findOne({
+      kind: 'landlord-pm',
+      propertyId: String((row as any).propertyId || ''),
+      participantIds: { $all: [String((row as any).landlordId || ''), String((row as any).managerUserId || '')] }
+    } as any)
+    return t || null
+  })
+})
 
 export const propertyManagerListingRequestDataSchema = Type.Object(
   {
     propertyId: Type.String(),
     message: Type.Optional(Type.String({ maxLength: 4000 })),
+    /** Initial fee proposal from the PM. */
+    proposal: Type.Optional(feeProposalSchema),
     /** Admin-only: create on behalf of this manager user. */
     managerUserId: Type.Optional(Type.String())
   },
@@ -74,12 +136,29 @@ export const propertyManagerListingRequestDataResolver = resolve<PropertyManager
       if (e?.className === 'not-found') throw new errors.BadRequest('Property not found')
       throw e
     }
+  },
+  proposal: async (value, _d, context) => {
+    if (!value) return undefined
+    const v = value as any
+    const uid = (context.params.user as any)?._id?.toString?.()
+    return { ...v, proposedByUserId: v.proposedByUserId || uid, at: v.at || new Date().toISOString() }
   }
 })
 
 export const propertyManagerListingRequestPatchSchema = Type.Object(
   {
-    status: Type.Optional(Type.Union([Type.Literal('accepted'), Type.Literal('rejected'), Type.Literal('withdrawn')])),
+    status: Type.Optional(
+      Type.Union([
+        Type.Literal('countered'),
+        Type.Literal('accepted'),
+        Type.Literal('rejected'),
+        Type.Literal('withdrawn')
+      ])
+    ),
+    counter: Type.Optional(feeProposalSchema),
+    proposal: Type.Optional(feeProposalSchema),
+    acceptedTerms: Type.Optional(feeProposalSchema),
+    message: Type.Optional(Type.String({ maxLength: 4000 })),
     reviewedBy: Type.Optional(Type.String()),
     reviewedAt: Type.Optional(Type.String({ format: 'date-time' })),
     updatedAt: Type.Optional(Type.String({ format: 'date-time' }))
@@ -108,3 +187,5 @@ export const propertyManagerListingRequestQuerySchema = Type.Intersect(
 export type PropertyManagerListingRequestQuery = Static<typeof propertyManagerListingRequestQuerySchema>
 export const propertyManagerListingRequestQueryValidator = getValidator(propertyManagerListingRequestQuerySchema, queryValidator)
 export const propertyManagerListingRequestQueryResolver = resolve<PropertyManagerListingRequestQuery, HookContext>({})
+
+export { deriveLegacyCommissionPercent }

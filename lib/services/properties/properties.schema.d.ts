@@ -98,11 +98,11 @@ export declare const propertyResolver: import("@feathersjs/schema").Resolver<{
     priceTrendsNote?: string | undefined;
     _id: string | {};
     createdAt: string;
+    country: string;
     landlordId: string;
     name: string;
     address: string;
     city: string;
-    country: string;
     propertyType: string;
 }, HookContext>;
 export declare const propertyExternalResolver: import("@feathersjs/schema").Resolver<{
@@ -149,11 +149,11 @@ export declare const propertyExternalResolver: import("@feathersjs/schema").Reso
     priceTrendsNote?: string | undefined;
     _id: string | {};
     createdAt: string;
+    country: string;
     landlordId: string;
     name: string;
     address: string;
     city: string;
-    country: string;
     propertyType: string;
 }, HookContext>;
 export declare const propertyDataSchema: import("@feathersjs/typebox").TObject<{
@@ -244,11 +244,11 @@ export declare const propertyDataResolver: import("@feathersjs/schema").Resolver
     priceTrendsNote?: string | undefined;
     _id: string | {};
     createdAt: string;
+    country: string;
     landlordId: string;
     name: string;
     address: string;
     city: string;
-    country: string;
     propertyType: string;
 }, HookContext>;
 export declare const propertyPatchSchema: import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TOmit<import("@feathersjs/typebox").TObject<{
@@ -349,11 +349,11 @@ export declare const propertyPatchResolver: import("@feathersjs/schema").Resolve
     priceTrendsNote?: string | undefined;
     _id: string | {};
     createdAt: string;
+    country: string;
     landlordId: string;
     name: string;
     address: string;
     city: string;
-    country: string;
     propertyType: string;
 }, HookContext>;
 export declare const propertyQueryProperties: import("@feathersjs/typebox").TPick<import("@feathersjs/typebox").TObject<{
@@ -415,6 +415,7 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
         _id: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         createdAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
+        country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         landlordId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         agentUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         listingType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
@@ -425,7 +426,6 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
         address: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         city: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         state: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
-        country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         area: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         neighborhood: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         buildingName: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
@@ -434,7 +434,7 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
         bedrooms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         bathrooms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
     }>;
-    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "createdAt" | "updatedAt" | "landlordId" | "agentUserId" | "listingType" | "verified" | "price" | "pricePeriod" | "name" | "address" | "city" | "state" | "country" | "area" | "neighborhood" | "buildingName" | "propertyType" | "propertyAgeYears" | "bedrooms" | "bathrooms")[]>;
+    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "createdAt" | "updatedAt" | "country" | "landlordId" | "agentUserId" | "listingType" | "verified" | "price" | "pricePeriod" | "name" | "address" | "city" | "state" | "area" | "neighborhood" | "buildingName" | "propertyType" | "propertyAgeYears" | "bedrooms" | "bathrooms")[]>;
     $and: import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
         _id: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
@@ -466,6 +466,17 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
             $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
             $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>>;
             $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>>;
+        }>, import("@feathersjs/typebox").TObject<{
+            [key: string]: import("@feathersjs/typebox").TSchema;
+        } | undefined>]>>]>>;
+        country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            $gt: import("@feathersjs/typebox").TString<string>;
+            $gte: import("@feathersjs/typebox").TString<string>;
+            $lt: import("@feathersjs/typebox").TString<string>;
+            $lte: import("@feathersjs/typebox").TString<string>;
+            $ne: import("@feathersjs/typebox").TString<string>;
+            $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
+            $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
@@ -576,17 +587,6 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
             $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
             $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>>;
             $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>>;
-        }>, import("@feathersjs/typebox").TObject<{
-            [key: string]: import("@feathersjs/typebox").TSchema;
-        } | undefined>]>>]>>;
-        country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-            $gt: import("@feathersjs/typebox").TString<string>;
-            $gte: import("@feathersjs/typebox").TString<string>;
-            $lt: import("@feathersjs/typebox").TString<string>;
-            $lte: import("@feathersjs/typebox").TString<string>;
-            $ne: import("@feathersjs/typebox").TString<string>;
-            $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
-            $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
@@ -702,6 +702,17 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
+            country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+                $gt: import("@feathersjs/typebox").TString<string>;
+                $gte: import("@feathersjs/typebox").TString<string>;
+                $lt: import("@feathersjs/typebox").TString<string>;
+                $lte: import("@feathersjs/typebox").TString<string>;
+                $ne: import("@feathersjs/typebox").TString<string>;
+                $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
+                $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
+            }>, import("@feathersjs/typebox").TObject<{
+                [key: string]: import("@feathersjs/typebox").TSchema;
+            } | undefined>]>>]>>;
             landlordId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
                 $gt: import("@feathersjs/typebox").TString<string>;
                 $gte: import("@feathersjs/typebox").TString<string>;
@@ -809,17 +820,6 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
                 $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
                 $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>>;
                 $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>>;
-            }>, import("@feathersjs/typebox").TObject<{
-                [key: string]: import("@feathersjs/typebox").TSchema;
-            } | undefined>]>>]>>;
-            country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-                $gt: import("@feathersjs/typebox").TString<string>;
-                $gte: import("@feathersjs/typebox").TString<string>;
-                $lt: import("@feathersjs/typebox").TString<string>;
-                $lte: import("@feathersjs/typebox").TString<string>;
-                $ne: import("@feathersjs/typebox").TString<string>;
-                $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
-                $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
@@ -936,6 +936,17 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
+        country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            $gt: import("@feathersjs/typebox").TString<string>;
+            $gte: import("@feathersjs/typebox").TString<string>;
+            $lt: import("@feathersjs/typebox").TString<string>;
+            $lte: import("@feathersjs/typebox").TString<string>;
+            $ne: import("@feathersjs/typebox").TString<string>;
+            $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
+            $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
+        }>, import("@feathersjs/typebox").TObject<{
+            [key: string]: import("@feathersjs/typebox").TSchema;
+        } | undefined>]>>]>>;
         landlordId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
@@ -1043,17 +1054,6 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
             $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
             $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>>;
             $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>>;
-        }>, import("@feathersjs/typebox").TObject<{
-            [key: string]: import("@feathersjs/typebox").TSchema;
-        } | undefined>]>>]>>;
-        country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-            $gt: import("@feathersjs/typebox").TString<string>;
-            $gte: import("@feathersjs/typebox").TString<string>;
-            $lt: import("@feathersjs/typebox").TString<string>;
-            $lte: import("@feathersjs/typebox").TString<string>;
-            $ne: import("@feathersjs/typebox").TString<string>;
-            $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
-            $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
@@ -1169,6 +1169,17 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
+    country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        $gt: import("@feathersjs/typebox").TString<string>;
+        $gte: import("@feathersjs/typebox").TString<string>;
+        $lt: import("@feathersjs/typebox").TString<string>;
+        $lte: import("@feathersjs/typebox").TString<string>;
+        $ne: import("@feathersjs/typebox").TString<string>;
+        $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
+        $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
+    }>, import("@feathersjs/typebox").TObject<{
+        [key: string]: import("@feathersjs/typebox").TSchema;
+    } | undefined>]>>]>>;
     landlordId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
         $gt: import("@feathersjs/typebox").TString<string>;
         $gte: import("@feathersjs/typebox").TString<string>;
@@ -1279,17 +1290,6 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
-    country: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-        $gt: import("@feathersjs/typebox").TString<string>;
-        $gte: import("@feathersjs/typebox").TString<string>;
-        $lt: import("@feathersjs/typebox").TString<string>;
-        $lte: import("@feathersjs/typebox").TString<string>;
-        $ne: import("@feathersjs/typebox").TString<string>;
-        $in: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
-        $nin: import("@feathersjs/typebox").TString<string> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TString<string>>;
-    }>, import("@feathersjs/typebox").TObject<{
-        [key: string]: import("@feathersjs/typebox").TSchema;
-    } | undefined>]>>]>>;
     area: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
         $gt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
         $gte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
@@ -1373,6 +1373,8 @@ export declare const propertyQuerySchema: import("@feathersjs/typebox").TInterse
     superAgent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TBoolean, import("@feathersjs/typebox").TString<string>]>>;
     /** PM-only: when true, `properties.find` is scoped to assigned properties (portfolio hub). Omit for public catalog. */
     pmPortfolio: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TBoolean, import("@feathersjs/typebox").TString<string>]>>;
+    /** Agent-only: when true, `properties.find` is scoped to assigned properties. */
+    agentPortfolio: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TBoolean, import("@feathersjs/typebox").TString<string>]>>;
 }>, import("@feathersjs/typebox").TObject<{}>]>;
 export type PropertyQuery = Static<typeof propertyQuerySchema>;
 export declare const propertyQueryValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -1383,6 +1385,7 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
         _id?: number | undefined;
         createdAt?: number | undefined;
         updatedAt?: number | undefined;
+        country?: number | undefined;
         landlordId?: number | undefined;
         agentUserId?: number | undefined;
         listingType?: number | undefined;
@@ -1393,7 +1396,6 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
         address?: number | undefined;
         city?: number | undefined;
         state?: number | undefined;
-        country?: number | undefined;
         area?: number | undefined;
         neighborhood?: number | undefined;
         buildingName?: number | undefined;
@@ -1402,7 +1404,7 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
         bedrooms?: number | undefined;
         bathrooms?: number | undefined;
     };
-    $select: ("_id" | "createdAt" | "updatedAt" | "landlordId" | "agentUserId" | "listingType" | "verified" | "price" | "pricePeriod" | "name" | "address" | "city" | "state" | "country" | "area" | "neighborhood" | "buildingName" | "propertyType" | "propertyAgeYears" | "bedrooms" | "bathrooms")[];
+    $select: ("_id" | "createdAt" | "updatedAt" | "country" | "landlordId" | "agentUserId" | "listingType" | "verified" | "price" | "pricePeriod" | "name" | "address" | "city" | "state" | "area" | "neighborhood" | "buildingName" | "propertyType" | "propertyAgeYears" | "bedrooms" | "bathrooms")[];
     $and: ({
         _id?: string | {} | Partial<{
             $gt: string | {};
@@ -1428,6 +1430,15 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
             $lt?: string | undefined;
             $lte?: string | undefined;
             $ne?: string | undefined;
+            $in: string | string[];
+            $nin: string | string[];
+        } & {}> | undefined;
+        country?: string | Partial<{
+            $gt: string;
+            $gte: string;
+            $lt: string;
+            $lte: string;
+            $ne: string;
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
@@ -1518,15 +1529,6 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
             $lt?: string | undefined;
             $lte?: string | undefined;
             $ne?: string | undefined;
-            $in: string | string[];
-            $nin: string | string[];
-        } & {}> | undefined;
-        country?: string | Partial<{
-            $gt: string;
-            $gte: string;
-            $lt: string;
-            $lte: string;
-            $ne: string;
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
@@ -1622,6 +1624,15 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
                 $in: string | string[];
                 $nin: string | string[];
             } & {}> | undefined;
+            country?: string | Partial<{
+                $gt: string;
+                $gte: string;
+                $lt: string;
+                $lte: string;
+                $ne: string;
+                $in: string | string[];
+                $nin: string | string[];
+            } & {}> | undefined;
             landlordId?: string | Partial<{
                 $gt: string;
                 $gte: string;
@@ -1709,15 +1720,6 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
                 $lt?: string | undefined;
                 $lte?: string | undefined;
                 $ne?: string | undefined;
-                $in: string | string[];
-                $nin: string | string[];
-            } & {}> | undefined;
-            country?: string | Partial<{
-                $gt: string;
-                $gte: string;
-                $lt: string;
-                $lte: string;
-                $ne: string;
                 $in: string | string[];
                 $nin: string | string[];
             } & {}> | undefined;
@@ -1814,6 +1816,15 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
+        country?: string | Partial<{
+            $gt: string;
+            $gte: string;
+            $lt: string;
+            $lte: string;
+            $ne: string;
+            $in: string | string[];
+            $nin: string | string[];
+        } & {}> | undefined;
         landlordId?: string | Partial<{
             $gt: string;
             $gte: string;
@@ -1901,15 +1912,6 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
             $lt?: string | undefined;
             $lte?: string | undefined;
             $ne?: string | undefined;
-            $in: string | string[];
-            $nin: string | string[];
-        } & {}> | undefined;
-        country?: string | Partial<{
-            $gt: string;
-            $gte: string;
-            $lt: string;
-            $lte: string;
-            $ne: string;
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
@@ -2005,6 +2007,15 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
         $in: string | string[];
         $nin: string | string[];
     } & {}> | undefined;
+    country?: string | Partial<{
+        $gt: string;
+        $gte: string;
+        $lt: string;
+        $lte: string;
+        $ne: string;
+        $in: string | string[];
+        $nin: string | string[];
+    } & {}> | undefined;
     landlordId?: string | Partial<{
         $gt: string;
         $gte: string;
@@ -2095,15 +2106,6 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
         $in: string | string[];
         $nin: string | string[];
     } & {}> | undefined;
-    country?: string | Partial<{
-        $gt: string;
-        $gte: string;
-        $lt: string;
-        $lte: string;
-        $ne: string;
-        $in: string | string[];
-        $nin: string | string[];
-    } & {}> | undefined;
     area?: string | Partial<{
         $gt?: string | undefined;
         $gte?: string | undefined;
@@ -2168,8 +2170,9 @@ export declare const propertyQueryResolver: import("@feathersjs/schema").Resolve
         $nin: number | number[];
     } & {}> | undefined;
 } & {
-    pmPortfolio?: string | boolean | undefined;
-    $search?: string | undefined;
     type?: "rent" | "buy" | "commercial" | "new" | undefined;
+    pmPortfolio?: string | boolean | undefined;
+    agentPortfolio?: string | boolean | undefined;
+    $search?: string | undefined;
     superAgent?: string | boolean | undefined;
 } & {}, HookContext>;

@@ -5,6 +5,7 @@ import type { Static } from '@feathersjs/typebox'
 import type { HookContext } from '../../declarations'
 import { dataValidator, queryValidator } from '../../validators'
 import { resolveEntityFiles } from '../../utils/resolveEntityFiles'
+import { defaultFeeSchema } from '../property-manager-profiles/property-manager-profiles.schema'
 
 export const agentProfileSchema = Type.Object(
   {
@@ -22,6 +23,8 @@ export const agentProfileSchema = Type.Object(
     listingsCount: Type.Optional(Type.Number()),
     responseTimeMinutes: Type.Optional(Type.Number()),
     verified: Type.Optional(Type.Boolean()),
+    /** Default fee preferences ("rate card") shown publicly and pre-filled on listing requests. */
+    defaultFee: Type.Optional(defaultFeeSchema),
     // Denormalised rating summary — updated by the agent-ratings service after-hooks.
     ratingAvg: Type.Optional(Type.Number()),
     ratingCount: Type.Optional(Type.Number()),
@@ -56,7 +59,8 @@ export const agentProfileDataSchema = Type.Object(
     languages: Type.Optional(Type.Array(Type.String())),
     avatarUrl: Type.Optional(Type.String()),
     listingsCount: Type.Optional(Type.Number()),
-    responseTimeMinutes: Type.Optional(Type.Number())
+    responseTimeMinutes: Type.Optional(Type.Number()),
+    defaultFee: Type.Optional(defaultFeeSchema)
   },
   { $id: 'AgentProfileData', additionalProperties: false }
 )

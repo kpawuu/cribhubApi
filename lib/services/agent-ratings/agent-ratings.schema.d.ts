@@ -7,6 +7,11 @@ export declare const agentRatingSchema: import("@feathersjs/typebox").TObject<{
     rating: import("@feathersjs/typebox").TNumber;
     comment: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewerName: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Admin moderation: when true, review is hidden from public listings (only admin/owner sees it). */
+    hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    hiddenAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    hiddenBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    moderationNote: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
 }>;
@@ -16,6 +21,10 @@ export declare const agentRatingResolver: import("@feathersjs/schema").Resolver<
     updatedAt?: string | undefined;
     comment?: string | undefined;
     reviewerName?: string | undefined;
+    hidden?: boolean | undefined;
+    hiddenAt?: string | undefined;
+    hiddenBy?: string | undefined;
+    moderationNote?: string | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -26,6 +35,10 @@ export declare const agentRatingExternalResolver: import("@feathersjs/schema").R
     updatedAt?: string | undefined;
     comment?: string | undefined;
     reviewerName?: string | undefined;
+    hidden?: boolean | undefined;
+    hiddenAt?: string | undefined;
+    hiddenBy?: string | undefined;
+    moderationNote?: string | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -44,6 +57,10 @@ export declare const agentRatingDataResolver: import("@feathersjs/schema").Resol
     updatedAt?: string | undefined;
     comment?: string | undefined;
     reviewerName?: string | undefined;
+    hidden?: boolean | undefined;
+    hiddenAt?: string | undefined;
+    hiddenBy?: string | undefined;
+    moderationNote?: string | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -53,6 +70,13 @@ export declare const agentRatingDataResolver: import("@feathersjs/schema").Resol
 export declare const agentRatingPatchSchema: import("@feathersjs/typebox").TObject<{
     rating: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     comment: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Admin-only: toggle moderation visibility. */
+    hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** Admin-only: timestamped when admin toggles `hidden`. */
+    hiddenAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<"date-time">, import("@feathersjs/typebox").TNull]>>;
+    /** Admin-only: stamped to the moderator user id. */
+    hiddenBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TNull]>>;
+    moderationNote: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
 }>;
 export type AgentRatingPatch = Static<typeof agentRatingPatchSchema>;
 export declare const agentRatingPatchValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -60,6 +84,10 @@ export declare const agentRatingPatchResolver: import("@feathersjs/schema").Reso
     updatedAt?: string | undefined;
     comment?: string | undefined;
     reviewerName?: string | undefined;
+    hidden?: boolean | undefined;
+    hiddenAt?: string | undefined;
+    hiddenBy?: string | undefined;
+    moderationNote?: string | undefined;
     _id: string | {};
     createdAt: string;
     userId: string;
@@ -73,9 +101,14 @@ export declare const agentRatingQueryProperties: import("@feathersjs/typebox").T
     rating: import("@feathersjs/typebox").TNumber;
     comment: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewerName: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Admin moderation: when true, review is hidden from public listings (only admin/owner sees it). */
+    hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    hiddenAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    hiddenBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    moderationNote: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
-}>, ["_id", "agentProfileId", "userId", "rating", "createdAt"]>;
+}>, ["_id", "agentProfileId", "userId", "rating", "hidden", "createdAt"]>;
 export declare const agentRatingQuerySchema: import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TObject<{
     $limit: import("@feathersjs/typebox").TNumber;
     $skip: import("@feathersjs/typebox").TNumber;
@@ -85,8 +118,9 @@ export declare const agentRatingQuerySchema: import("@feathersjs/typebox").TInte
         userId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         agentProfileId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         rating: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
+        hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
     }>;
-    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "createdAt" | "userId" | "agentProfileId" | "rating")[]>;
+    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "createdAt" | "userId" | "agentProfileId" | "rating" | "hidden")[]>;
     $and: import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
         _id: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
@@ -140,6 +174,17 @@ export declare const agentRatingQuerySchema: import("@feathersjs/typebox").TInte
             $ne: import("@feathersjs/typebox").TNumber;
             $in: import("@feathersjs/typebox").TNumber | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TNumber>;
             $nin: import("@feathersjs/typebox").TNumber | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TNumber>;
+        }>, import("@feathersjs/typebox").TObject<{
+            [key: string]: import("@feathersjs/typebox").TSchema;
+        } | undefined>]>>]>>;
+        hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            $gt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $gte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $lt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $lte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
+            $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
@@ -197,6 +242,17 @@ export declare const agentRatingQuerySchema: import("@feathersjs/typebox").TInte
                 $ne: import("@feathersjs/typebox").TNumber;
                 $in: import("@feathersjs/typebox").TNumber | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TNumber>;
                 $nin: import("@feathersjs/typebox").TNumber | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TNumber>;
+            }>, import("@feathersjs/typebox").TObject<{
+                [key: string]: import("@feathersjs/typebox").TSchema;
+            } | undefined>]>>]>>;
+            hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+                $gt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+                $gte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+                $lt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+                $lte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+                $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+                $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
+                $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
@@ -258,6 +314,17 @@ export declare const agentRatingQuerySchema: import("@feathersjs/typebox").TInte
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
+        hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            $gt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $gte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $lt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $lte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+            $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
+            $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
+        }>, import("@feathersjs/typebox").TObject<{
+            [key: string]: import("@feathersjs/typebox").TSchema;
+        } | undefined>]>>]>>;
     }>>>;
 }>>, import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
     _id: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
@@ -315,6 +382,17 @@ export declare const agentRatingQuerySchema: import("@feathersjs/typebox").TInte
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
+    hidden: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        $gt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        $gte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        $lt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        $lte: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        $ne: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+        $in: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
+        $nin: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>>;
+    }>, import("@feathersjs/typebox").TObject<{
+        [key: string]: import("@feathersjs/typebox").TSchema;
+    } | undefined>]>>]>>;
 }>>]>, import("@feathersjs/typebox").TObject<{}>]>;
 export type AgentRatingQuery = Static<typeof agentRatingQuerySchema>;
 export declare const agentRatingQueryValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -327,8 +405,9 @@ export declare const agentRatingQueryResolver: import("@feathersjs/schema").Reso
         userId?: number | undefined;
         agentProfileId?: number | undefined;
         rating?: number | undefined;
+        hidden?: number | undefined;
     };
-    $select: ("_id" | "createdAt" | "userId" | "agentProfileId" | "rating")[];
+    $select: ("_id" | "createdAt" | "userId" | "agentProfileId" | "rating" | "hidden")[];
     $and: ({
         _id?: string | {} | Partial<{
             $gt: string | {};
@@ -374,6 +453,15 @@ export declare const agentRatingQueryResolver: import("@feathersjs/schema").Reso
             $ne: number;
             $in: number | number[];
             $nin: number | number[];
+        } & {}> | undefined;
+        hidden?: boolean | Partial<{
+            $gt?: boolean | undefined;
+            $gte?: boolean | undefined;
+            $lt?: boolean | undefined;
+            $lte?: boolean | undefined;
+            $ne?: boolean | undefined;
+            $in: boolean | boolean[];
+            $nin: boolean | boolean[];
         } & {}> | undefined;
     } | {
         $or: {
@@ -421,6 +509,15 @@ export declare const agentRatingQueryResolver: import("@feathersjs/schema").Reso
                 $ne: number;
                 $in: number | number[];
                 $nin: number | number[];
+            } & {}> | undefined;
+            hidden?: boolean | Partial<{
+                $gt?: boolean | undefined;
+                $gte?: boolean | undefined;
+                $lt?: boolean | undefined;
+                $lte?: boolean | undefined;
+                $ne?: boolean | undefined;
+                $in: boolean | boolean[];
+                $nin: boolean | boolean[];
             } & {}> | undefined;
         }[];
     })[];
@@ -470,6 +567,15 @@ export declare const agentRatingQueryResolver: import("@feathersjs/schema").Reso
             $in: number | number[];
             $nin: number | number[];
         } & {}> | undefined;
+        hidden?: boolean | Partial<{
+            $gt?: boolean | undefined;
+            $gte?: boolean | undefined;
+            $lt?: boolean | undefined;
+            $lte?: boolean | undefined;
+            $ne?: boolean | undefined;
+            $in: boolean | boolean[];
+            $nin: boolean | boolean[];
+        } & {}> | undefined;
     }[];
 }> & {
     _id?: string | {} | Partial<{
@@ -516,5 +622,14 @@ export declare const agentRatingQueryResolver: import("@feathersjs/schema").Reso
         $ne: number;
         $in: number | number[];
         $nin: number | number[];
+    } & {}> | undefined;
+    hidden?: boolean | Partial<{
+        $gt?: boolean | undefined;
+        $gte?: boolean | undefined;
+        $lt?: boolean | undefined;
+        $lte?: boolean | undefined;
+        $ne?: boolean | undefined;
+        $in: boolean | boolean[];
+        $nin: boolean | boolean[];
     } & {}> | undefined;
 } & {}, HookContext>;

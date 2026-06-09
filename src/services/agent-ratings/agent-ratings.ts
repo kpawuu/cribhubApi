@@ -4,6 +4,8 @@ import { authenticate } from '@feathersjs/authentication'
 import { ObjectId } from 'mongodb'
 
 import type { Application, HookContext } from '../../declarations'
+import { authenticateIfJwtPresent } from '../../hooks/authenticate-if-jwt-present'
+import { populateRoles } from '../../hooks/populate-roles'
 import { AgentRatingsService, getOptions } from './agent-ratings.class'
 import {
   agentRatingResolver,
@@ -33,20 +35,27 @@ async function syncAgentRatingSummary(context: HookContext): Promise<HookContext
   if (!agentProfileId) return context
 
   try {
-    // Fetch all ratings for this agent (up to 10 000 – sufficient for any real scenario).
-    const all = (await context.app.service(agentRatingsPath).find({
-      paginate: false,
-      query: { agentProfileId, $limit: 10000 }
-    }) as unknown) as any[]
+    // Aggregate directly via MongoDB to avoid going through service query
+    // validators (which don't allow `$exists` on the boolean `hidden` field)
+    // AND the agent-profiles patch validators.
+    const db = await context.app.get('mongodbClient')
+
+    const visibleFilter = {
+      agentProfileId,
+      $or: [{ hidden: { $exists: false } }, { hidden: false }]
+    } as any
+
+    const all = (await db.collection('agent_ratings').find(visibleFilter, {
+      projection: { rating: 1 },
+      limit: 10000
+    } as any).toArray()) as any[]
 
     const count = all.length
     const avg =
       count > 0
-        ? Number((all.reduce((s: number, r: any) => s + (r.rating ?? 0), 0) / count).toFixed(2))
+        ? Number((all.reduce((s: number, r: any) => s + (Number(r.rating) || 0), 0) / count).toFixed(2))
         : 0
 
-    // Write directly to MongoDB to avoid going through agent-profiles schema validators.
-    const db = await context.app.get('mongodbClient')
     const id = agentProfileId
     const filter = ObjectId.isValid(id) && id.length === 24 ? { _id: new ObjectId(id) } : { _id: id as any }
 
@@ -94,6 +103,7 @@ const attachUserAndEnforceUnique = async (context: HookContext): Promise<HookCon
 
 // ──────────────────────────────────────────────────────────────────
 // Before patch/remove: only the owner (or admin) may modify.
+// Owners cannot toggle moderation fields.
 // ──────────────────────────────────────────────────────────────────
 const restrictToOwner = async (context: HookContext): Promise<HookContext> => {
   if (!context.params.provider) return context
@@ -102,16 +112,61 @@ const restrictToOwner = async (context: HookContext): Promise<HookContext> => {
   if (!user?._id) throw new errors.NotAuthenticated()
 
   const roles: string[] = Array.isArray(user.roles) ? user.roles : []
+  const isAdmin = roles.includes('admin')
+
+  if (!isAdmin) {
+    const existing = await context.app
+      .service(agentRatingsPath)
+      .get(context.id as any, { provider: undefined } as any)
+    if ((existing as any).userId !== user._id.toString()) {
+      throw new errors.Forbidden('You can only modify your own reviews.')
+    }
+    // Strip moderation fields from non-admin patches.
+    if (context.method === 'patch' && context.data && typeof context.data === 'object') {
+      delete (context.data as any).hidden
+      delete (context.data as any).moderationNote
+    }
+  } else if (context.method === 'patch' && context.data && typeof context.data === 'object') {
+    const d = context.data as any
+    // Stamp hiddenBy/hiddenAt when an admin toggles `hidden`.
+    if (d.hidden === true) {
+      d.hiddenAt = new Date().toISOString()
+      d.hiddenBy = user._id.toString()
+    } else if (d.hidden === false) {
+      d.hiddenAt = null as any
+      d.hiddenBy = null as any
+    }
+  }
+  return context
+}
+
+// ──────────────────────────────────────────────────────────────────
+// Public find: hide reviews where `hidden=true` unless admin or
+// requesting your own review. Applied as an after-find filter so it
+// works regardless of mongo query operator validation quirks.
+// ──────────────────────────────────────────────────────────────────
+const hideModeratedFromPublic = async (context: HookContext) => {
+  if (!context.params.provider) return context
+  const user = context.params.user as any
+  const roles: string[] = Array.isArray(user?.roles) ? user.roles : []
   if (roles.includes('admin')) return context
 
-  const existing = await context.app
-    .service(agentRatingsPath)
-    .get(context.id as any, { provider: undefined } as any)
-
-  if ((existing as any).userId !== user._id.toString()) {
-    throw new errors.Forbidden('You can only modify your own reviews.')
+  const uid = user?._id?.toString?.()
+  const keep = (r: any): boolean => {
+    if (!r?.hidden) return true
+    if (uid && String(r.userId) === uid) return true
+    return false
   }
 
+  const result = context.result as any
+  if (Array.isArray(result)) {
+    context.result = result.filter(keep)
+  } else if (result && Array.isArray(result.data)) {
+    result.data = result.data.filter(keep)
+    if (typeof result.total === 'number') {
+      result.total = Math.max(0, result.total - (Array.isArray(result.data) ? 0 : 0))
+    }
+  }
   return context
 }
 
@@ -136,9 +191,9 @@ export const agentRatings = (app: Application) => {
         schemaHooks.validateQuery(agentRatingQueryValidator),
         schemaHooks.resolveQuery(agentRatingQueryResolver)
       ],
-      // Public: anyone can browse reviews.
-      find: [],
-      get: [],
+      // Public browse: anyone can list reviews; admins see hidden ones too.
+      find: [authenticateIfJwtPresent(), populateRoles],
+      get: [authenticateIfJwtPresent(), populateRoles],
       create: [
         authenticate('jwt'),
         attachUserAndEnforceUnique,
@@ -147,13 +202,15 @@ export const agentRatings = (app: Application) => {
       ],
       patch: [
         authenticate('jwt'),
+        populateRoles,
         restrictToOwner,
         schemaHooks.validateData(agentRatingPatchValidator),
         schemaHooks.resolveData(agentRatingPatchResolver)
       ],
-      remove: [authenticate('jwt'), restrictToOwner]
+      remove: [authenticate('jwt'), populateRoles, restrictToOwner]
     },
     after: {
+      find: [hideModeratedFromPublic],
       create: [syncAgentRatingSummary],
       patch: [syncAgentRatingSummary],
       remove: [syncAgentRatingSummary]

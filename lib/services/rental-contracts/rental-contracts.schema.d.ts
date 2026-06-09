@@ -25,10 +25,10 @@ export declare const rentalContractValidator: import("@feathersjs/schema").Valid
 export declare const rentalContractResolver: import("@feathersjs/schema").Resolver<{
     updatedAt?: string | undefined;
     status?: "draft" | "sent" | "signed" | "active" | "expired" | undefined;
+    documentUrl?: string | undefined;
     rentCurrency?: string | undefined;
     contractType?: "ai_generated" | "manual_upload" | undefined;
     content?: string | undefined;
-    documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
     lastPaidAt?: string | undefined;
@@ -44,10 +44,10 @@ export declare const rentalContractResolver: import("@feathersjs/schema").Resolv
 export declare const rentalContractExternalResolver: import("@feathersjs/schema").Resolver<{
     updatedAt?: string | undefined;
     status?: "draft" | "sent" | "signed" | "active" | "expired" | undefined;
+    documentUrl?: string | undefined;
     rentCurrency?: string | undefined;
     contractType?: "ai_generated" | "manual_upload" | undefined;
     content?: string | undefined;
-    documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
     lastPaidAt?: string | undefined;
@@ -78,10 +78,10 @@ export declare const rentalContractDataValidator: import("@feathersjs/schema").V
 export declare const rentalContractDataResolver: import("@feathersjs/schema").Resolver<{
     updatedAt?: string | undefined;
     status?: "draft" | "sent" | "signed" | "active" | "expired" | undefined;
+    documentUrl?: string | undefined;
     rentCurrency?: string | undefined;
     contractType?: "ai_generated" | "manual_upload" | undefined;
     content?: string | undefined;
-    documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
     lastPaidAt?: string | undefined;
@@ -118,10 +118,10 @@ export declare const rentalContractPatchValidator: import("@feathersjs/schema").
 export declare const rentalContractPatchResolver: import("@feathersjs/schema").Resolver<{
     updatedAt?: string | undefined;
     status?: "draft" | "sent" | "signed" | "active" | "expired" | undefined;
+    documentUrl?: string | undefined;
     rentCurrency?: string | undefined;
     contractType?: "ai_generated" | "manual_upload" | undefined;
     content?: string | undefined;
-    documentUrl?: string | undefined;
     landlordSignedAt?: string | undefined;
     tenantSignedAt?: string | undefined;
     lastPaidAt?: string | undefined;

@@ -7,6 +7,7 @@ import { mergeQuery } from '../../hooks/merge-query'
 import { populateRoles } from '../../hooks/populate-roles'
 import { requireRole } from '../../hooks/require-role'
 import { createUserNotification } from '../../utils/create-user-notification'
+import { findOrCreateThread } from '../threads/threads'
 
 import { PropertyManagerListingRequestsService, getOptions } from './property-manager-listing-requests.class'
 import {
@@ -80,27 +81,81 @@ const restrictPatch = async (context: HookContext) => {
   if (!prev) return context
   await assertRowAccess(context, prev)
 
-  const st = (context.data as any)?.status
-  if (!st) throw new errors.BadRequest('status is required')
-
-  if (roles.includes('admin')) {
-    if (!['accepted', 'rejected', 'withdrawn'].includes(st)) throw new errors.BadRequest('Invalid status')
-    return context
-  }
-
   const uid = user._id.toString()
-  if (prev.landlordId === uid) {
-    if (st !== 'accepted' && st !== 'rejected') throw new errors.Forbidden('Landlords may only accept or reject requests.')
-    if (prev.status !== 'pending') throw new errors.BadRequest('Only pending requests can be decided.')
-    ;(context.data as any).reviewedBy = uid
-    ;(context.data as any).reviewedAt = new Date().toISOString()
+  const d = context.data as any
+  const st = d?.status as string | undefined
+
+  // Admin: nearly unrestricted edits
+  if (roles.includes('admin')) {
+    if (st && !['countered', 'accepted', 'rejected', 'withdrawn'].includes(st)) {
+      throw new errors.BadRequest('Invalid status')
+    }
+    if (st === 'accepted' && !d.acceptedTerms) {
+      d.acceptedTerms = prev.counter || prev.proposal || undefined
+    }
     return context
   }
 
-  if (prev.managerUserId === uid) {
-    if (st !== 'withdrawn') throw new errors.Forbidden('You may only withdraw your own pending request.')
-    if (prev.status !== 'pending') throw new errors.BadRequest('Only pending requests can be withdrawn.')
+  // Landlord: accept / reject / counter (only on pending or countered)
+  if (prev.landlordId === uid) {
+    if (!st && !d.counter) throw new errors.BadRequest('Provide a status or counter')
+    if (st && !['accepted', 'rejected', 'countered'].includes(st)) {
+      throw new errors.Forbidden('Landlords may only accept, reject or counter.')
+    }
+    if (!['pending', 'countered'].includes(prev.status)) {
+      throw new errors.BadRequest(`Cannot update a request with status "${prev.status}".`)
+    }
+    if (d.counter) {
+      const stamped = {
+        ...d.counter,
+        proposedByUserId: uid,
+        at: new Date().toISOString()
+      }
+      d.counter = stamped
+      d.status = 'countered'
+    }
+    if (st === 'accepted') {
+      d.acceptedTerms = d.acceptedTerms || prev.counter || prev.proposal || undefined
+    }
+    d.reviewedBy = uid
+    d.reviewedAt = new Date().toISOString()
+    // Strip fields landlords cannot modify
+    delete d.proposal
     return context
+  }
+
+  // PM: can only update their own proposal on countered (re-counter) or withdraw
+  if (prev.managerUserId === uid) {
+    if (st === 'withdrawn') {
+      if (!['pending', 'countered'].includes(prev.status)) {
+        throw new errors.BadRequest('Only pending/countered requests can be withdrawn.')
+      }
+      return context
+    }
+    if (st === 'accepted') {
+      // PM accepts landlord's counter
+      if (prev.status !== 'countered') throw new errors.Forbidden('No counter to accept.')
+      d.acceptedTerms = d.acceptedTerms || prev.counter || prev.proposal || undefined
+      d.reviewedBy = uid
+      d.reviewedAt = new Date().toISOString()
+      // Lock to accepted only
+      delete d.counter
+      delete d.proposal
+      return context
+    }
+    if (d.proposal && prev.status === 'countered') {
+      // PM re-counters by submitting a new proposal -> back to 'pending' for landlord review
+      const stamped = {
+        ...d.proposal,
+        proposedByUserId: uid,
+        at: new Date().toISOString()
+      }
+      d.proposal = stamped
+      d.status = 'pending'
+      delete d.counter
+      return context
+    }
+    throw new errors.Forbidden('You can only withdraw, accept the counter, or send a new proposal.')
   }
 
   throw new errors.Forbidden('You cannot update this request.')
@@ -123,9 +178,9 @@ const preventDuplicatePending = async (context: HookContext) => {
   const dup = await db.collection('property_manager_listing_requests').findOne({
     propertyId: d.propertyId,
     managerUserId: d.managerUserId,
-    status: 'pending'
+    status: { $in: ['pending', 'countered'] }
   })
-  if (dup) throw new errors.BadRequest('You already have a pending request for this property.')
+  if (dup) throw new errors.BadRequest('You already have an open request for this property.')
   return context
 }
 
@@ -135,7 +190,9 @@ const ensureRequesterIsPm = async (context: HookContext) => {
     ? ((context.params.user as any).roles as string[])
     : []
   if (roles.includes('admin')) return context
-  if (!roles.includes('property_manager')) throw new errors.Forbidden('Only approved property managers can request to manage a listing.')
+  if (!roles.includes('property_manager')) {
+    throw new errors.Forbidden('Only approved property managers can request to manage a listing.')
+  }
   return context
 }
 
@@ -158,8 +215,10 @@ const notifyLandlordOnCreate = async (context: HookContext) => {
     eventKey: 'pm_listing_request.created',
     category: 'assignment',
     title: 'Property manager requested access',
-    body: r.message ? String(r.message).slice(0, 280) : 'A property manager asked to help manage one of your listings.',
-    linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}`,
+    body: r.message
+      ? String(r.message).slice(0, 280)
+      : 'A property manager asked to help manage one of your listings.',
+    linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}?tab=pm&request=${r._id}`,
     relatedService: 'property-manager-listing-requests',
     relatedId: String(r._id),
     metadata: { propertyId: r.propertyId, managerUserId: r.managerUserId }
@@ -167,10 +226,11 @@ const notifyLandlordOnCreate = async (context: HookContext) => {
   return context
 }
 
-const notifyManagerOnDecision = async (context: HookContext) => {
+const notifyOnStatusChange = async (context: HookContext) => {
   const r = context.result as any
   const prev = (context.params as any).__pmListingPrev as any
   if (!r?.managerUserId || !prev || prev.status === r.status) return context
+
   if (r.status === 'accepted') {
     await createUserNotification(context.app, {
       userId: String(r.managerUserId),
@@ -178,9 +238,10 @@ const notifyManagerOnDecision = async (context: HookContext) => {
       category: 'assignment',
       title: 'Management request accepted',
       body: 'The landlord accepted your request to help manage their property.',
-      linkUrl: `${appUrl()}/landlord/properties`,
+      linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}`,
       relatedService: 'property-manager-listing-requests',
-      relatedId: String(r._id)
+      relatedId: String(r._id),
+      metadata: { propertyId: r.propertyId }
     })
   } else if (r.status === 'rejected') {
     await createUserNotification(context.app, {
@@ -193,6 +254,30 @@ const notifyManagerOnDecision = async (context: HookContext) => {
       relatedService: 'property-manager-listing-requests',
       relatedId: String(r._id)
     })
+  } else if (r.status === 'countered') {
+    // Landlord countered the PM's terms
+    await createUserNotification(context.app, {
+      userId: String(r.managerUserId),
+      eventKey: 'pm_listing_request.countered',
+      category: 'assignment',
+      title: 'Landlord proposed different terms',
+      body: 'Review their counter-offer to continue.',
+      linkUrl: `${appUrl()}/pm/listings?request=${r._id}`,
+      relatedService: 'property-manager-listing-requests',
+      relatedId: String(r._id)
+    })
+  } else if (r.status === 'pending' && prev.status === 'countered') {
+    // PM re-countered → notify landlord
+    await createUserNotification(context.app, {
+      userId: String(r.landlordId),
+      eventKey: 'pm_listing_request.recountered',
+      category: 'assignment',
+      title: 'Property manager updated their proposal',
+      body: 'Review the new fee proposal to continue.',
+      linkUrl: `${appUrl()}/landlord/properties/${r.propertyId}?tab=pm&request=${r._id}`,
+      relatedService: 'property-manager-listing-requests',
+      relatedId: String(r._id)
+    })
   }
   return context
 }
@@ -202,21 +287,39 @@ const provisionAssignmentWhenAccepted = async (context: HookContext) => {
   const prev = (context.params as any).__pmListingPrev as any
   if (!r || r.status !== 'accepted' || !prev || prev.status === 'accepted') return context
 
-  const res = await context.app.service('property-manager-assignments').find({
+  const res = (await context.app.service('property-manager-assignments').find({
     query: { propertyId: r.propertyId, managerUserId: r.managerUserId, $limit: 1 },
     paginate: false,
     provider: undefined
-  } as any)
+  } as any)) as any
   const data = Array.isArray(res) ? res : []
-  if (data.length) return context
+  if (!data.length) {
+    await context.app.service('property-manager-assignments').create(
+      {
+        propertyId: r.propertyId,
+        managerUserId: r.managerUserId,
+        acceptedTerms: r.acceptedTerms,
+        sourceRequestId: String(r._id)
+      } as any,
+      { provider: undefined } as any
+    )
+  }
 
-  await context.app.service('property-manager-assignments').create(
-    {
-      propertyId: r.propertyId,
-      managerUserId: r.managerUserId
-    } as any,
-    { provider: undefined } as any
-  )
+  // Create a landlord ↔ PM thread for this property if not exists.
+  try {
+    const prop = await context.app
+      .service('properties')
+      .get(String(r.propertyId), { provider: undefined } as any)
+      .catch(() => null)
+    await findOrCreateThread(context.app, {
+      kind: 'landlord-pm',
+      participantIds: [String(r.landlordId), String(r.managerUserId)],
+      subject: { type: 'property', id: String(r.propertyId) },
+      propertyId: String(r.propertyId),
+      title: (prop as any)?.name ? `Manage: ${(prop as any).name}` : 'Property management',
+      systemNote: 'You are now connected. Use this thread to coordinate property management.'
+    })
+  } catch {}
   return context
 }
 
@@ -272,7 +375,7 @@ export const propertyManagerListingRequests = (app: Application) => {
     },
     after: {
       create: [notifyLandlordOnCreate],
-      patch: [provisionAssignmentWhenAccepted, notifyManagerOnDecision]
+      patch: [provisionAssignmentWhenAccepted, notifyOnStatusChange]
     }
   })
 }

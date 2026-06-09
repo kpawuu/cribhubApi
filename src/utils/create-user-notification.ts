@@ -13,6 +13,8 @@ export type CreateUserNotificationInput = {
   metadata?: Record<string, unknown>
   /** When true, skips the post-create notification email (in-app row is still created). */
   skipEmail?: boolean
+  /** When true, skips the post-create SMS (in-app row is still created). */
+  skipSms?: boolean
 }
 
 /**
@@ -36,7 +38,8 @@ export async function createUserNotification(app: Application, input: CreateUser
       },
       {
         provider: undefined,
-        ...(input.skipEmail ? { skipNotificationEmail: true } : {})
+        ...(input.skipEmail ? { skipNotificationEmail: true } : {}),
+        ...(input.skipSms ? { skipNotificationSms: true } : {})
       } as any
     )
   } catch (e) {

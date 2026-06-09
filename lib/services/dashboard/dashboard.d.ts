@@ -14,6 +14,9 @@ export declare class DashboardService {
         rentalContracts: number;
         users: number;
         assignedProperties?: undefined;
+        pendingRequests?: undefined;
+        payoutsDue?: undefined;
+        unreadMessages?: undefined;
         openInquiries?: undefined;
     } | {
         role: "property_manager";
@@ -24,6 +27,9 @@ export declare class DashboardService {
         maintenanceRequests: number;
         payments: number;
         rentalContracts: number;
+        pendingRequests: number;
+        payoutsDue: number;
+        unreadMessages: number;
         properties?: undefined;
         users?: undefined;
         openInquiries?: undefined;
@@ -38,6 +44,9 @@ export declare class DashboardService {
         rentalContracts: number;
         users?: undefined;
         assignedProperties?: undefined;
+        pendingRequests?: undefined;
+        payoutsDue?: undefined;
+        unreadMessages?: undefined;
         openInquiries?: undefined;
     } | {
         role: "agent";
@@ -47,10 +56,13 @@ export declare class DashboardService {
         rentalApplications: number;
         maintenanceRequests: number;
         openInquiries: number;
+        pendingRequests: number;
+        payoutsDue: number;
         properties?: undefined;
         payments?: undefined;
         rentalContracts?: undefined;
         users?: undefined;
+        unreadMessages?: undefined;
     } | {
         role: "tenant";
         rentalApplications: number;
@@ -62,6 +74,9 @@ export declare class DashboardService {
         units?: undefined;
         users?: undefined;
         assignedProperties?: undefined;
+        pendingRequests?: undefined;
+        payoutsDue?: undefined;
+        unreadMessages?: undefined;
         openInquiries?: undefined;
     }>;
 }

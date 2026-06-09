@@ -29,7 +29,7 @@ export declare const unitResolver: import("@feathersjs/schema").Resolver<{
     files?: any[] | undefined;
     updatedAt?: string | undefined;
     status?: "vacant" | "occupied" | "maintenance" | undefined;
-    listingType?: "rental" | "sale" | undefined;
+    listingType?: "sale" | "rental" | undefined;
     images?: string[] | undefined;
     squareFeet?: number | undefined;
     rentCurrency?: string | undefined;
@@ -51,7 +51,7 @@ export declare const unitExternalResolver: import("@feathersjs/schema").Resolver
     files?: any[] | undefined;
     updatedAt?: string | undefined;
     status?: "vacant" | "occupied" | "maintenance" | undefined;
-    listingType?: "rental" | "sale" | undefined;
+    listingType?: "sale" | "rental" | undefined;
     images?: string[] | undefined;
     squareFeet?: number | undefined;
     rentCurrency?: string | undefined;
@@ -93,7 +93,7 @@ export declare const unitDataResolver: import("@feathersjs/schema").Resolver<{
     files?: any[] | undefined;
     updatedAt?: string | undefined;
     status?: "vacant" | "occupied" | "maintenance" | undefined;
-    listingType?: "rental" | "sale" | undefined;
+    listingType?: "sale" | "rental" | undefined;
     images?: string[] | undefined;
     squareFeet?: number | undefined;
     rentCurrency?: string | undefined;
@@ -139,7 +139,7 @@ export declare const unitPatchResolver: import("@feathersjs/schema").Resolver<{
     files?: any[] | undefined;
     updatedAt?: string | undefined;
     status?: "vacant" | "occupied" | "maintenance" | undefined;
-    listingType?: "rental" | "sale" | undefined;
+    listingType?: "sale" | "rental" | undefined;
     images?: string[] | undefined;
     squareFeet?: number | undefined;
     rentCurrency?: string | undefined;
@@ -616,14 +616,14 @@ export declare const unitQueryResolver: import("@feathersjs/schema").Resolver<Pa
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        listingType?: "rental" | "sale" | Partial<{
-            $gt?: "rental" | "sale" | undefined;
-            $gte?: "rental" | "sale" | undefined;
-            $lt?: "rental" | "sale" | undefined;
-            $lte?: "rental" | "sale" | undefined;
-            $ne?: "rental" | "sale" | undefined;
-            $in: "rental" | "sale" | ("rental" | "sale")[];
-            $nin: "rental" | "sale" | ("rental" | "sale")[];
+        listingType?: "sale" | "rental" | Partial<{
+            $gt?: "sale" | "rental" | undefined;
+            $gte?: "sale" | "rental" | undefined;
+            $lt?: "sale" | "rental" | undefined;
+            $lte?: "sale" | "rental" | undefined;
+            $ne?: "sale" | "rental" | undefined;
+            $in: "sale" | "rental" | ("sale" | "rental")[];
+            $nin: "sale" | "rental" | ("sale" | "rental")[];
         } & {}> | undefined;
         unitNumber?: string | Partial<{
             $gt: string;
@@ -690,14 +690,14 @@ export declare const unitQueryResolver: import("@feathersjs/schema").Resolver<Pa
                 $in: string | string[];
                 $nin: string | string[];
             } & {}> | undefined;
-            listingType?: "rental" | "sale" | Partial<{
-                $gt?: "rental" | "sale" | undefined;
-                $gte?: "rental" | "sale" | undefined;
-                $lt?: "rental" | "sale" | undefined;
-                $lte?: "rental" | "sale" | undefined;
-                $ne?: "rental" | "sale" | undefined;
-                $in: "rental" | "sale" | ("rental" | "sale")[];
-                $nin: "rental" | "sale" | ("rental" | "sale")[];
+            listingType?: "sale" | "rental" | Partial<{
+                $gt?: "sale" | "rental" | undefined;
+                $gte?: "sale" | "rental" | undefined;
+                $lt?: "sale" | "rental" | undefined;
+                $lte?: "sale" | "rental" | undefined;
+                $ne?: "sale" | "rental" | undefined;
+                $in: "sale" | "rental" | ("sale" | "rental")[];
+                $nin: "sale" | "rental" | ("sale" | "rental")[];
             } & {}> | undefined;
             unitNumber?: string | Partial<{
                 $gt: string;
@@ -765,14 +765,14 @@ export declare const unitQueryResolver: import("@feathersjs/schema").Resolver<Pa
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        listingType?: "rental" | "sale" | Partial<{
-            $gt?: "rental" | "sale" | undefined;
-            $gte?: "rental" | "sale" | undefined;
-            $lt?: "rental" | "sale" | undefined;
-            $lte?: "rental" | "sale" | undefined;
-            $ne?: "rental" | "sale" | undefined;
-            $in: "rental" | "sale" | ("rental" | "sale")[];
-            $nin: "rental" | "sale" | ("rental" | "sale")[];
+        listingType?: "sale" | "rental" | Partial<{
+            $gt?: "sale" | "rental" | undefined;
+            $gte?: "sale" | "rental" | undefined;
+            $lt?: "sale" | "rental" | undefined;
+            $lte?: "sale" | "rental" | undefined;
+            $ne?: "sale" | "rental" | undefined;
+            $in: "sale" | "rental" | ("sale" | "rental")[];
+            $nin: "sale" | "rental" | ("sale" | "rental")[];
         } & {}> | undefined;
         unitNumber?: string | Partial<{
             $gt: string;
@@ -839,14 +839,14 @@ export declare const unitQueryResolver: import("@feathersjs/schema").Resolver<Pa
         $in: string | string[];
         $nin: string | string[];
     } & {}> | undefined;
-    listingType?: "rental" | "sale" | Partial<{
-        $gt?: "rental" | "sale" | undefined;
-        $gte?: "rental" | "sale" | undefined;
-        $lt?: "rental" | "sale" | undefined;
-        $lte?: "rental" | "sale" | undefined;
-        $ne?: "rental" | "sale" | undefined;
-        $in: "rental" | "sale" | ("rental" | "sale")[];
-        $nin: "rental" | "sale" | ("rental" | "sale")[];
+    listingType?: "sale" | "rental" | Partial<{
+        $gt?: "sale" | "rental" | undefined;
+        $gte?: "sale" | "rental" | undefined;
+        $lt?: "sale" | "rental" | undefined;
+        $lte?: "sale" | "rental" | undefined;
+        $ne?: "sale" | "rental" | undefined;
+        $in: "sale" | "rental" | ("sale" | "rental")[];
+        $nin: "sale" | "rental" | ("sale" | "rental")[];
     } & {}> | undefined;
     unitNumber?: string | Partial<{
         $gt: string;

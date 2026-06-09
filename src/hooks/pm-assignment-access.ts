@@ -53,6 +53,40 @@ export const restrictPropertyManagerPropertiesFind = async (context: HookContext
   return context
 }
 
+/**
+ * Agent-only users: portfolio `find` is limited to assigned properties.
+ * Landlord hub passes `agentPortfolio: true` so agents only see properties they represent.
+ */
+export const restrictAgentPropertiesFind = async (context: HookContext) => {
+  if (context.method !== 'find' || !context.params.provider) return context
+  const user = context.params.user as any
+  if (!user?._id) return context
+  const roles: string[] = Array.isArray(user.roles) ? user.roles : []
+  if (!roles.includes('agent') || roles.includes('admin') || roles.includes('landlord')) return context
+
+  const q: Record<string, any> = { ...(context.params.query || {}) }
+  const portfolio = q.agentPortfolio === true || q.agentPortfolio === 'true'
+  delete q.agentPortfolio
+  context.params.query = q
+
+  if (!portfolio) return context
+
+  const res = (await context.app.service('agent-assignments').find(
+    { paginate: false, query: { agentUserId: user._id.toString() } } as any,
+    { provider: undefined } as any
+  )) as any
+  const list = Array.isArray(res) ? res : res?.data || []
+  const ids = list.map((a: any) => String(a.propertyId)).filter(Boolean)
+  const q2: Record<string, any> = { ...(context.params.query || {}) }
+  if (!ids.length) {
+    q2._id = { $in: [] }
+  } else {
+    q2._id = { $in: propertyObjectIds(ids) }
+  }
+  context.params.query = q2
+  return context
+}
+
 export const requirePmAssignedToProperty = (propertyId: string) => {
   return async (context: HookContext) => {
     if (!context.params.provider) return context

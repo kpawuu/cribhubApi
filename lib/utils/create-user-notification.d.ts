@@ -11,6 +11,8 @@ export type CreateUserNotificationInput = {
     metadata?: Record<string, unknown>;
     /** When true, skips the post-create notification email (in-app row is still created). */
     skipEmail?: boolean;
+    /** When true, skips the post-create SMS (in-app row is still created). */
+    skipSms?: boolean;
 };
 /**
  * Persist an in-app notification (internal service call).

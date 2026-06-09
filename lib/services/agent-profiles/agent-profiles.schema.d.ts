@@ -15,6 +15,22 @@ export declare const agentProfileSchema: import("@feathersjs/typebox").TObject<{
     listingsCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     responseTimeMinutes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     verified: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** Default fee preferences ("rate card") shown publicly and pre-filled on listing requests. */
+    defaultFee: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    }>>;
     ratingAvg: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     ratingCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
@@ -37,6 +53,21 @@ export declare const agentProfileResolver: import("@feathersjs/schema").Resolver
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    defaultFee?: {
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+    } | undefined;
     ratingAvg?: number | undefined;
     ratingCount?: number | undefined;
     _id: string | {};
@@ -58,6 +89,21 @@ export declare const agentProfileExternalResolver: import("@feathersjs/schema").
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    defaultFee?: {
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+    } | undefined;
     ratingAvg?: number | undefined;
     ratingCount?: number | undefined;
     _id: string | {};
@@ -77,6 +123,21 @@ export declare const agentProfileDataSchema: import("@feathersjs/typebox").TObje
     avatarUrl: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     listingsCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     responseTimeMinutes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+    defaultFee: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    }>>;
 }>;
 export type AgentProfileData = Static<typeof agentProfileDataSchema>;
 export declare const agentProfileDataValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -94,6 +155,21 @@ export declare const agentProfileDataResolver: import("@feathersjs/schema").Reso
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    defaultFee?: {
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+    } | undefined;
     ratingAvg?: number | undefined;
     ratingCount?: number | undefined;
     _id: string | {};
@@ -116,6 +192,22 @@ export declare const agentProfilePatchSchema: import("@feathersjs/typebox").TPar
     listingsCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     responseTimeMinutes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     verified: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** Default fee preferences ("rate card") shown publicly and pre-filled on listing requests. */
+    defaultFee: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    }>>;
     ratingAvg: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     ratingCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;
@@ -138,6 +230,21 @@ export declare const agentProfilePatchResolver: import("@feathersjs/schema").Res
     bio?: string | undefined;
     regions?: string[] | undefined;
     languages?: string[] | undefined;
+    defaultFee?: {
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+    } | undefined;
     ratingAvg?: number | undefined;
     ratingCount?: number | undefined;
     _id: string | {};
@@ -160,6 +267,22 @@ export declare const agentProfileQueryProperties: import("@feathersjs/typebox").
     listingsCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     responseTimeMinutes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     verified: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TBoolean>;
+    /** Default fee preferences ("rate card") shown publicly and pre-filled on listing requests. */
+    defaultFee: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    }>>;
     ratingAvg: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     ratingCount: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
     files: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TAny>>;

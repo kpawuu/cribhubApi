@@ -24,8 +24,8 @@ export declare const legalDocumentResolver: import("@feathersjs/schema").Resolve
     createdAt: string;
     userId: string;
     title: string;
-    content: string;
     documentType: string;
+    content: string;
 }, HookContext<LegalDocumentsService<import("./legal-documents.class").LegalDocumentsParams>>>;
 export declare const legalDocumentExternalResolver: import("@feathersjs/schema").Resolver<{
     metadata?: any;
@@ -36,8 +36,8 @@ export declare const legalDocumentExternalResolver: import("@feathersjs/schema")
     createdAt: string;
     userId: string;
     title: string;
-    content: string;
     documentType: string;
+    content: string;
 }, HookContext<LegalDocumentsService<import("./legal-documents.class").LegalDocumentsParams>>>;
 export declare const legalDocumentDataSchema: import("@feathersjs/typebox").TObject<{
     title: import("@feathersjs/typebox").TString<string>;
@@ -57,8 +57,8 @@ export declare const legalDocumentDataResolver: import("@feathersjs/schema").Res
     createdAt: string;
     userId: string;
     title: string;
-    content: string;
     documentType: string;
+    content: string;
 }, HookContext<LegalDocumentsService<import("./legal-documents.class").LegalDocumentsParams>>>;
 export declare const legalDocumentPatchSchema: import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TOmit<import("@feathersjs/typebox").TObject<{
     _id: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
@@ -83,8 +83,8 @@ export declare const legalDocumentPatchResolver: import("@feathersjs/schema").Re
     createdAt: string;
     userId: string;
     title: string;
-    content: string;
     documentType: string;
+    content: string;
 }, HookContext<LegalDocumentsService<import("./legal-documents.class").LegalDocumentsParams>>>;
 export declare const legalDocumentQueryProperties: import("@feathersjs/typebox").TPick<import("@feathersjs/typebox").TObject<{
     _id: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;

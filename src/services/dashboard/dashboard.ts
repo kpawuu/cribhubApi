@@ -86,16 +86,29 @@ export class DashboardService {
             ? { landlordId: landlordIds[0] }
             : { landlordId: { $in: landlordIds } }
 
-      const [assignedProperties, units, inquiries, rentalApplications, maintenanceRequests, payments, rentalContracts] =
-        await Promise.all([
-          Promise.resolve(ids.length),
-          unitsFilter ? countColl(app, 'units', unitsFilter) : Promise.resolve(0),
-          landlordIds.length ? countColl(app, 'inquiries', { landlordId: { $in: landlordIds } }) : Promise.resolve(0),
-          unitQuery ? countColl(app, 'rental_applications', unitQuery) : Promise.resolve(0),
-          unitQuery ? countColl(app, 'maintenance_requests', unitQuery) : Promise.resolve(0),
-          landlordIds.length ? countColl(app, 'payments', payFilter) : Promise.resolve(0),
-          landlordIds.length ? countColl(app, 'rental_contracts', payFilter) : Promise.resolve(0)
-        ])
+      const [
+        assignedProperties,
+        units,
+        inquiries,
+        rentalApplications,
+        maintenanceRequests,
+        payments,
+        rentalContracts,
+        pendingRequests,
+        payoutsDue,
+        unreadMessages
+      ] = await Promise.all([
+        Promise.resolve(ids.length),
+        unitsFilter ? countColl(app, 'units', unitsFilter) : Promise.resolve(0),
+        landlordIds.length ? countColl(app, 'inquiries', { landlordId: { $in: landlordIds } }) : Promise.resolve(0),
+        unitQuery ? countColl(app, 'rental_applications', unitQuery) : Promise.resolve(0),
+        unitQuery ? countColl(app, 'maintenance_requests', unitQuery) : Promise.resolve(0),
+        landlordIds.length ? countColl(app, 'payments', payFilter) : Promise.resolve(0),
+        landlordIds.length ? countColl(app, 'rental_contracts', payFilter) : Promise.resolve(0),
+        countColl(app, 'property_manager_listing_requests', { managerUserId: uid, status: { $in: ['pending', 'countered'] } }),
+        countColl(app, 'pm_payouts', { managerUserId: uid, status: 'pending' }),
+        countColl(app, 'threads', { participantIds: uid })
+      ])
 
       return {
         role,
@@ -105,7 +118,10 @@ export class DashboardService {
         rentalApplications,
         maintenanceRequests,
         payments,
-        rentalContracts
+        rentalContracts,
+        pendingRequests,
+        payoutsDue,
+        unreadMessages
       }
     }
 
@@ -155,15 +171,25 @@ export class DashboardService {
         unitIdList.length === 0 ? null : unitIdList.length === 1 ? { unitId: unitIdList[0] } : { unitId: { $in: unitIdList } }
       const unitsFilter = ids.length === 0 ? null : ids.length === 1 ? { propertyId: ids[0] } : { propertyId: { $in: ids } }
 
-      const [assignedProperties, units, inquiries, rentalApplications, maintenanceRequests, openInquiries] =
-        await Promise.all([
-          Promise.resolve(ids.length),
-          unitsFilter ? countColl(app, 'units', unitsFilter) : Promise.resolve(0),
-          countColl(app, 'inquiries', { agentUserId: uid }),
-          unitQuery ? countColl(app, 'rental_applications', unitQuery) : Promise.resolve(0),
-          unitQuery ? countColl(app, 'maintenance_requests', unitQuery) : Promise.resolve(0),
-          countColl(app, 'inquiries', { agentUserId: uid, status: 'new' })
-        ])
+      const [
+        assignedProperties,
+        units,
+        inquiries,
+        rentalApplications,
+        maintenanceRequests,
+        openInquiries,
+        pendingRequests,
+        payoutsDue
+      ] = await Promise.all([
+        Promise.resolve(ids.length),
+        unitsFilter ? countColl(app, 'units', unitsFilter) : Promise.resolve(0),
+        countColl(app, 'inquiries', { agentUserId: uid }),
+        unitQuery ? countColl(app, 'rental_applications', unitQuery) : Promise.resolve(0),
+        unitQuery ? countColl(app, 'maintenance_requests', unitQuery) : Promise.resolve(0),
+        countColl(app, 'inquiries', { agentUserId: uid, status: 'new' }),
+        countColl(app, 'agent_listing_requests', { agentUserId: uid, status: { $in: ['pending', 'countered'] } }),
+        countColl(app, 'agent_payouts', { agentUserId: uid, status: 'pending' })
+      ])
 
       return {
         role,
@@ -172,7 +198,9 @@ export class DashboardService {
         inquiries,
         rentalApplications,
         maintenanceRequests,
-        openInquiries
+        openInquiries,
+        pendingRequests,
+        payoutsDue
       }
     }
 

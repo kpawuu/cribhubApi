@@ -9,7 +9,14 @@ import type { ChatMessagesService } from './chat-messages.class'
 export const chatMessageSchema = Type.Object(
   {
     _id: ObjectIdSchema(),
-    inquiryId: Type.String(),
+    /**
+     * Modern thread reference. Always present on new messages. For legacy
+     * inquiry-only messages, `threadId` is populated by a migration hook to
+     * the thread auto-created from the inquiry.
+     */
+    threadId: Type.Optional(Type.String()),
+    /** Legacy: inquiry the message belongs to. Still maintained for tenant→landlord chats. */
+    inquiryId: Type.Optional(Type.String()),
     senderUserId: Type.String(),
     senderName: Type.Optional(Type.String()),
     senderRole: Type.Optional(
@@ -17,10 +24,13 @@ export const chatMessageSchema = Type.Object(
         Type.Literal('tenant'),
         Type.Literal('landlord'),
         Type.Literal('agent'),
-        Type.Literal('property_manager')
+        Type.Literal('property_manager'),
+        Type.Literal('admin')
       ])
     ),
     body: Type.String(),
+    /** Optional system message (e.g. "Landlord accepted your request") rendered as a chip. */
+    system: Type.Optional(Type.Boolean()),
     createdAt: Type.String({ format: 'date-time' }),
     updatedAt: Type.Optional(Type.String({ format: 'date-time' }))
   },
@@ -34,8 +44,10 @@ export const chatMessageExternalResolver = resolve<ChatMessage, HookContext<Chat
 
 export const chatMessageDataSchema = Type.Object(
   {
-    inquiryId: Type.String(),
-    body: Type.String()
+    threadId: Type.Optional(Type.String()),
+    inquiryId: Type.Optional(Type.String()),
+    body: Type.String(),
+    system: Type.Optional(Type.Boolean())
   },
   { $id: 'ChatMessageData', additionalProperties: false }
 )
@@ -59,6 +71,7 @@ export const chatMessagePatchResolver = resolve<ChatMessage, HookContext<ChatMes
 
 export const chatMessageQueryProperties = Type.Pick(chatMessageSchema, [
   '_id',
+  'threadId',
   'inquiryId',
   'senderUserId',
   'createdAt'

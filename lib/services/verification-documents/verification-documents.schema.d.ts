@@ -14,17 +14,17 @@ export declare const verificationDocumentValidator: import("@feathersjs/schema")
 export declare const verificationDocumentResolver: import("@feathersjs/schema").Resolver<{
     files?: any[] | undefined;
     _id: string | {};
-    documentUrl: string;
-    documentType: string;
     roleRequestId: string;
+    documentType: string;
+    documentUrl: string;
     uploadedAt: string;
 }, HookContext<VerificationDocumentsService<import("./verification-documents.class").VerificationDocumentsParams>>>;
 export declare const verificationDocumentExternalResolver: import("@feathersjs/schema").Resolver<{
     files?: any[] | undefined;
     _id: string | {};
-    documentUrl: string;
-    documentType: string;
     roleRequestId: string;
+    documentType: string;
+    documentUrl: string;
     uploadedAt: string;
 }, HookContext<VerificationDocumentsService<import("./verification-documents.class").VerificationDocumentsParams>>>;
 export declare const verificationDocumentDataSchema: import("@feathersjs/typebox").TObject<{
@@ -37,9 +37,9 @@ export declare const verificationDocumentDataValidator: import("@feathersjs/sche
 export declare const verificationDocumentDataResolver: import("@feathersjs/schema").Resolver<{
     files?: any[] | undefined;
     _id: string | {};
-    documentUrl: string;
-    documentType: string;
     roleRequestId: string;
+    documentType: string;
+    documentUrl: string;
     uploadedAt: string;
 }, HookContext<VerificationDocumentsService<import("./verification-documents.class").VerificationDocumentsParams>>>;
 export declare const verificationDocumentPatchSchema: import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TOmit<import("@feathersjs/typebox").TObject<{
@@ -55,9 +55,9 @@ export declare const verificationDocumentPatchValidator: import("@feathersjs/sch
 export declare const verificationDocumentPatchResolver: import("@feathersjs/schema").Resolver<{
     files?: any[] | undefined;
     _id: string | {};
-    documentUrl: string;
-    documentType: string;
     roleRequestId: string;
+    documentType: string;
+    documentUrl: string;
     uploadedAt: string;
 }, HookContext<VerificationDocumentsService<import("./verification-documents.class").VerificationDocumentsParams>>>;
 export declare const verificationDocumentQueryProperties: import("@feathersjs/typebox").TPick<import("@feathersjs/typebox").TObject<{
@@ -73,10 +73,10 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
     $skip: import("@feathersjs/typebox").TNumber;
     $sort: import("@feathersjs/typebox").TObject<{
         _id: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
-        documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
         roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
+        documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TInteger>;
     }>;
-    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "documentType" | "roleRequestId")[]>;
+    $select: import("@feathersjs/typebox").TUnsafe<("_id" | "roleRequestId" | "documentType")[]>;
     $and: import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
         _id: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
@@ -89,7 +89,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -100,7 +100,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -124,7 +124,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
-            documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
                 $gt: import("@feathersjs/typebox").TString<string>;
                 $gte: import("@feathersjs/typebox").TString<string>;
                 $lt: import("@feathersjs/typebox").TString<string>;
@@ -135,7 +135,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
-            roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
                 $gt: import("@feathersjs/typebox").TString<string>;
                 $gte: import("@feathersjs/typebox").TString<string>;
                 $lt: import("@feathersjs/typebox").TString<string>;
@@ -160,7 +160,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -171,7 +171,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
             $gt: import("@feathersjs/typebox").TString<string>;
             $gte: import("@feathersjs/typebox").TString<string>;
             $lt: import("@feathersjs/typebox").TString<string>;
@@ -195,7 +195,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
-    documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+    roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
         $gt: import("@feathersjs/typebox").TString<string>;
         $gte: import("@feathersjs/typebox").TString<string>;
         $lt: import("@feathersjs/typebox").TString<string>;
@@ -206,7 +206,7 @@ export declare const verificationDocumentQuerySchema: import("@feathersjs/typebo
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
-    roleRequestId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+    documentType: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
         $gt: import("@feathersjs/typebox").TString<string>;
         $gte: import("@feathersjs/typebox").TString<string>;
         $lt: import("@feathersjs/typebox").TString<string>;
@@ -225,10 +225,10 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
     $skip: number;
     $sort: {
         _id?: number | undefined;
-        documentType?: number | undefined;
         roleRequestId?: number | undefined;
+        documentType?: number | undefined;
     };
-    $select: ("_id" | "documentType" | "roleRequestId")[];
+    $select: ("_id" | "roleRequestId" | "documentType")[];
     $and: ({
         _id?: string | {} | Partial<{
             $gt: string | {};
@@ -239,7 +239,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
             $in: string | {} | (string | {})[];
             $nin: string | {} | (string | {})[];
         } & {}> | undefined;
-        documentType?: string | Partial<{
+        roleRequestId?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -248,7 +248,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        roleRequestId?: string | Partial<{
+        documentType?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -268,7 +268,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
                 $in: string | {} | (string | {})[];
                 $nin: string | {} | (string | {})[];
             } & {}> | undefined;
-            documentType?: string | Partial<{
+            roleRequestId?: string | Partial<{
                 $gt: string;
                 $gte: string;
                 $lt: string;
@@ -277,7 +277,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
                 $in: string | string[];
                 $nin: string | string[];
             } & {}> | undefined;
-            roleRequestId?: string | Partial<{
+            documentType?: string | Partial<{
                 $gt: string;
                 $gte: string;
                 $lt: string;
@@ -298,7 +298,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
             $in: string | {} | (string | {})[];
             $nin: string | {} | (string | {})[];
         } & {}> | undefined;
-        documentType?: string | Partial<{
+        roleRequestId?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -307,7 +307,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        roleRequestId?: string | Partial<{
+        documentType?: string | Partial<{
             $gt: string;
             $gte: string;
             $lt: string;
@@ -327,7 +327,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
         $in: string | {} | (string | {})[];
         $nin: string | {} | (string | {})[];
     } & {}> | undefined;
-    documentType?: string | Partial<{
+    roleRequestId?: string | Partial<{
         $gt: string;
         $gte: string;
         $lt: string;
@@ -336,7 +336,7 @@ export declare const verificationDocumentQueryResolver: import("@feathersjs/sche
         $in: string | string[];
         $nin: string | string[];
     } & {}> | undefined;
-    roleRequestId?: string | Partial<{
+    documentType?: string | Partial<{
         $gt: string;
         $gte: string;
         $lt: string;

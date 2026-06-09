@@ -23,8 +23,12 @@
     "compile": "shx rm -rf lib/ && tsc",
     "start": "node lib/",
     "test": "echo \"(no tests yet)\"",
+    "smoke": "ts-node scripts/smoke-test.ts",
+    "smoke:cleanup": "ts-node scripts/smoke-test.ts --cleanup",
     "seed:properties": "ts-node scripts/seed-properties.ts",
     "seed:test-users": "ts-node scripts/seed-test-users.ts",
+    "seed:features": "ts-node scripts/seed-features.ts",
+    "seed:all": "npm run seed:test-users && npm run seed:properties && npm run seed:features",
     "postman:generate": "node postman/generate-collection.mjs"
   },
   "dependencies": {

@@ -1,17 +1,84 @@
 import type { Static } from '@feathersjs/typebox';
 import type { HookContext } from '../../declarations';
-export declare const pmListingRequestStatusSchema: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+import { deriveLegacyCommissionPercent } from '../fee-proposal-shared';
+export declare const pmListingRequestStatusSchema: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
 export declare const propertyManagerListingRequestSchema: import("@feathersjs/typebox").TObject<{
     _id: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
     propertyId: import("@feathersjs/typebox").TString<string>;
     managerUserId: import("@feathersjs/typebox").TString<string>;
     landlordId: import("@feathersjs/typebox").TString<string>;
     message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
-    status: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+    status: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+    /** Initial fee proposal from the PM. */
+    proposal: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    /** Landlord counter-offer (present when status = 'countered'). */
+    counter: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    /** Final agreed terms (set when status moves to 'accepted'). */
+    acceptedTerms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
     reviewedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    /** Virtual: full property manager profile (loaded on demand via ?include=manager). */
+    manager: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: property snapshot. */
+    property: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: lightweight thread between landlord & manager, when one exists. */
+    thread: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
 }>;
 export type PropertyManagerListingRequest = Static<typeof propertyManagerListingRequestSchema>;
 export declare const propertyManagerListingRequestValidator: import("@feathersjs/schema").Validator<any, any>;
@@ -20,9 +87,69 @@ export declare const propertyManagerListingRequestResolver: import("@feathersjs/
     message?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    manager?: any;
+    property?: any;
+    proposal?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    counter?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    thread?: any;
     _id: string | {};
     createdAt: string;
-    status: "pending" | "rejected" | "accepted" | "withdrawn";
+    status: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
     propertyId: string;
     managerUserId: string;
     landlordId: string;
@@ -32,9 +159,69 @@ export declare const propertyManagerListingRequestExternalResolver: import("@fea
     message?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    manager?: any;
+    property?: any;
+    proposal?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    counter?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    thread?: any;
     _id: string | {};
     createdAt: string;
-    status: "pending" | "rejected" | "accepted" | "withdrawn";
+    status: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
     propertyId: string;
     managerUserId: string;
     landlordId: string;
@@ -42,6 +229,26 @@ export declare const propertyManagerListingRequestExternalResolver: import("@fea
 export declare const propertyManagerListingRequestDataSchema: import("@feathersjs/typebox").TObject<{
     propertyId: import("@feathersjs/typebox").TString<string>;
     message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+    /** Initial fee proposal from the PM. */
+    proposal: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
     /** Admin-only: create on behalf of this manager user. */
     managerUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
 }>;
@@ -52,15 +259,133 @@ export declare const propertyManagerListingRequestDataResolver: import("@feather
     message?: string | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    manager?: any;
+    property?: any;
+    proposal?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    counter?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    thread?: any;
     _id: string | {};
     createdAt: string;
-    status: "pending" | "rejected" | "accepted" | "withdrawn";
+    status: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
     propertyId: string;
     managerUserId: string;
     landlordId: string;
 }, HookContext>;
 export declare const propertyManagerListingRequestPatchSchema: import("@feathersjs/typebox").TObject<{
-    status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+    status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+    counter: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    proposal: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    acceptedTerms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
@@ -69,9 +394,67 @@ export type PropertyManagerListingRequestPatch = Static<typeof propertyManagerLi
 export declare const propertyManagerListingRequestPatchValidator: import("@feathersjs/schema").Validator<any, any>;
 export declare const propertyManagerListingRequestPatchResolver: import("@feathersjs/schema").Resolver<{
     updatedAt?: string | undefined;
-    status?: "rejected" | "accepted" | "withdrawn" | undefined;
+    message?: string | undefined;
+    status?: "rejected" | "countered" | "accepted" | "withdrawn" | undefined;
     reviewedBy?: string | undefined;
     reviewedAt?: string | undefined;
+    acceptedTerms?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    proposal?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
+    counter?: {
+        at?: string | undefined;
+        notes?: string | undefined;
+        rent?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        sale?: {
+            notes?: string | undefined;
+            currency?: string | undefined;
+            value: number;
+            type: "fixed" | "percent" | "months_rent" | "percent_rent_collected";
+        } | undefined;
+        triggers?: ("rent_consummated" | "sale_consummated" | "first_month_paid" | "each_renewal" | "monthly_rent_collected")[] | undefined;
+        validityDays?: number | undefined;
+        proposedByUserId?: string | undefined;
+    } | undefined;
 }, HookContext>;
 export declare const propertyManagerListingRequestQueryProperties: import("@feathersjs/typebox").TPick<import("@feathersjs/typebox").TObject<{
     _id: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TString<string>, import("@feathersjs/typebox").TObject<{}>]>;
@@ -79,11 +462,77 @@ export declare const propertyManagerListingRequestQueryProperties: import("@feat
     managerUserId: import("@feathersjs/typebox").TString<string>;
     landlordId: import("@feathersjs/typebox").TString<string>;
     message: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
-    status: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+    status: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+    /** Initial fee proposal from the PM. */
+    proposal: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    /** Landlord counter-offer (present when status = 'countered'). */
+    counter: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
+    /** Final agreed terms (set when status moves to 'accepted'). */
+    acceptedTerms: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+        rent: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        sale: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TObject<{
+            type: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"percent">, import("@feathersjs/typebox").TLiteral<"fixed">, import("@feathersjs/typebox").TLiteral<"months_rent">, import("@feathersjs/typebox").TLiteral<"percent_rent_collected">]>;
+            value: import("@feathersjs/typebox").TNumber;
+            currency: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+            notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        }>>;
+        triggers: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"rent_consummated">, import("@feathersjs/typebox").TLiteral<"sale_consummated">, import("@feathersjs/typebox").TLiteral<"first_month_paid">, import("@feathersjs/typebox").TLiteral<"each_renewal">, import("@feathersjs/typebox").TLiteral<"monthly_rent_collected">]>>>;
+        validityDays: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TNumber>;
+        notes: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        proposedByUserId: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
+        at: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    }>>;
     reviewedBy: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<string>>;
     reviewedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
     createdAt: import("@feathersjs/typebox").TString<"date-time">;
     updatedAt: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TString<"date-time">>;
+    /** Virtual: full property manager profile (loaded on demand via ?include=manager). */
+    manager: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: property snapshot. */
+    property: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
+    /** Virtual: lightweight thread between landlord & manager, when one exists. */
+    thread: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TAny>;
 }>, ["_id", "propertyId", "managerUserId", "landlordId", "status", "createdAt", "updatedAt"]>;
 export declare const propertyManagerListingRequestQuerySchema: import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TObject<{
     $limit: import("@feathersjs/typebox").TNumber;
@@ -132,14 +581,14 @@ export declare const propertyManagerListingRequestQuerySchema: import("@feathers
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-            $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
-            $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+        status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+            $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
@@ -211,14 +660,14 @@ export declare const propertyManagerListingRequestQuerySchema: import("@feathers
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
-            status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-                $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-                $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-                $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-                $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-                $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-                $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
-                $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+            status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+                $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+                $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+                $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+                $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+                $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+                $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+                $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
             }>, import("@feathersjs/typebox").TObject<{
                 [key: string]: import("@feathersjs/typebox").TSchema;
             } | undefined>]>>]>>;
@@ -291,14 +740,14 @@ export declare const propertyManagerListingRequestQuerySchema: import("@feathers
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
-        status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-            $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-            $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
-            $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+        status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+            $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+            $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+            $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
         }>, import("@feathersjs/typebox").TObject<{
             [key: string]: import("@feathersjs/typebox").TSchema;
         } | undefined>]>>]>>;
@@ -370,14 +819,14 @@ export declare const propertyManagerListingRequestQuerySchema: import("@feathers
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
-    status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
-        $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-        $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-        $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-        $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-        $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
-        $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
-        $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+    status: import("@feathersjs/typebox").TOptional<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>, import("@feathersjs/typebox").TPartial<import("@feathersjs/typebox").TIntersect<[import("@feathersjs/typebox").TObject<{
+        $gt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+        $gte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+        $lt: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+        $lte: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+        $ne: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>;
+        $in: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
+        $nin: import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]> | import("@feathersjs/typebox").TArray<import("@feathersjs/typebox").TUnion<[import("@feathersjs/typebox").TLiteral<"pending">, import("@feathersjs/typebox").TLiteral<"countered">, import("@feathersjs/typebox").TLiteral<"accepted">, import("@feathersjs/typebox").TLiteral<"rejected">, import("@feathersjs/typebox").TLiteral<"withdrawn">]>>;
     }>, import("@feathersjs/typebox").TObject<{
         [key: string]: import("@feathersjs/typebox").TSchema;
     } | undefined>]>>]>>;
@@ -458,14 +907,14 @@ export declare const propertyManagerListingRequestQueryResolver: import("@feathe
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        status?: "pending" | "rejected" | "accepted" | "withdrawn" | Partial<{
-            $gt: "pending" | "rejected" | "accepted" | "withdrawn";
-            $gte: "pending" | "rejected" | "accepted" | "withdrawn";
-            $lt: "pending" | "rejected" | "accepted" | "withdrawn";
-            $lte: "pending" | "rejected" | "accepted" | "withdrawn";
-            $ne: "pending" | "rejected" | "accepted" | "withdrawn";
-            $in: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
-            $nin: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
+        status?: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | Partial<{
+            $gt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $gte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $lt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $lte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $ne: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $in: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
+            $nin: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
         } & {}> | undefined;
         propertyId?: string | Partial<{
             $gt: string;
@@ -523,14 +972,14 @@ export declare const propertyManagerListingRequestQueryResolver: import("@feathe
                 $in: string | string[];
                 $nin: string | string[];
             } & {}> | undefined;
-            status?: "pending" | "rejected" | "accepted" | "withdrawn" | Partial<{
-                $gt: "pending" | "rejected" | "accepted" | "withdrawn";
-                $gte: "pending" | "rejected" | "accepted" | "withdrawn";
-                $lt: "pending" | "rejected" | "accepted" | "withdrawn";
-                $lte: "pending" | "rejected" | "accepted" | "withdrawn";
-                $ne: "pending" | "rejected" | "accepted" | "withdrawn";
-                $in: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
-                $nin: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
+            status?: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | Partial<{
+                $gt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+                $gte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+                $lt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+                $lte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+                $ne: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+                $in: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
+                $nin: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
             } & {}> | undefined;
             propertyId?: string | Partial<{
                 $gt: string;
@@ -589,14 +1038,14 @@ export declare const propertyManagerListingRequestQueryResolver: import("@feathe
             $in: string | string[];
             $nin: string | string[];
         } & {}> | undefined;
-        status?: "pending" | "rejected" | "accepted" | "withdrawn" | Partial<{
-            $gt: "pending" | "rejected" | "accepted" | "withdrawn";
-            $gte: "pending" | "rejected" | "accepted" | "withdrawn";
-            $lt: "pending" | "rejected" | "accepted" | "withdrawn";
-            $lte: "pending" | "rejected" | "accepted" | "withdrawn";
-            $ne: "pending" | "rejected" | "accepted" | "withdrawn";
-            $in: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
-            $nin: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
+        status?: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | Partial<{
+            $gt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $gte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $lt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $lte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $ne: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+            $in: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
+            $nin: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
         } & {}> | undefined;
         propertyId?: string | Partial<{
             $gt: string;
@@ -654,14 +1103,14 @@ export declare const propertyManagerListingRequestQueryResolver: import("@feathe
         $in: string | string[];
         $nin: string | string[];
     } & {}> | undefined;
-    status?: "pending" | "rejected" | "accepted" | "withdrawn" | Partial<{
-        $gt: "pending" | "rejected" | "accepted" | "withdrawn";
-        $gte: "pending" | "rejected" | "accepted" | "withdrawn";
-        $lt: "pending" | "rejected" | "accepted" | "withdrawn";
-        $lte: "pending" | "rejected" | "accepted" | "withdrawn";
-        $ne: "pending" | "rejected" | "accepted" | "withdrawn";
-        $in: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
-        $nin: "pending" | "rejected" | "accepted" | "withdrawn" | ("pending" | "rejected" | "accepted" | "withdrawn")[];
+    status?: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | Partial<{
+        $gt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+        $gte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+        $lt: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+        $lte: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+        $ne: "pending" | "rejected" | "countered" | "accepted" | "withdrawn";
+        $in: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
+        $nin: "pending" | "rejected" | "countered" | "accepted" | "withdrawn" | ("pending" | "rejected" | "countered" | "accepted" | "withdrawn")[];
     } & {}> | undefined;
     propertyId?: string | Partial<{
         $gt: string;
@@ -691,3 +1140,4 @@ export declare const propertyManagerListingRequestQueryResolver: import("@feathe
         $nin: string | string[];
     } & {}> | undefined;
 } & {}, HookContext>;
+export { deriveLegacyCommissionPercent };
