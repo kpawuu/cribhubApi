@@ -1,0 +1,35 @@
+# Build artefacts (the builder stage produces these)
+lib
+node_modules
+.cache
+
+# Local secrets — production reads them from real environment variables /
+# the platform's secret store via `config/custom-environment-variables.json`.
+.env
+.env.*
+!.env.example
+
+# Dev-only output that should never ship.
+*.log
+seed-out.log
+smoke-out.log
+postman/CribHub.postman_collection.json
+
+# Editor/OS noise
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# VCS metadata
+.git
+.gitignore
+.gitattributes
+
+# Tests / scripts that are not required at runtime.
+test
+scripts
+
+# Docs (kept out of runtime image to keep it small).
+README.md
+*.md

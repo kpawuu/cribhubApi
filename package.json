@@ -21,6 +21,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon -x ts-node src/index.ts",
     "compile": "shx rm -rf lib/ && tsc",
+    "build": "npm run compile",
+    "heroku-postbuild": "npm run build",
     "start": "node lib/",
     "test": "echo \"(no tests yet)\"",
     "smoke": "ts-node scripts/smoke-test.ts",

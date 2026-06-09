@@ -7,7 +7,7 @@ This API follows the **same FeathersJS structure and auth-management approach** 
 ### 1) Install
 
 ```bash
-cd /Users/kpawuu/Documents/apps/rentflow_api
+cd /path/to/cribhubApi
 npm install
 ```
 
@@ -24,6 +24,81 @@ Set these variables (or rely on `config/custom-environment-variables.json`):
 
 ```bash
 npm run dev
+```
+
+## Production deployment
+
+`npm start` runs `node lib/` — the compiled output of `npm run build`. **The
+build step must run before start**, otherwise you will see:
+
+```
+Error: Cannot find module '/app/lib'
+code: 'MODULE_NOT_FOUND'
+```
+
+`lib/` is gitignored, so on every fresh deploy you must regenerate it. Pick
+one of the following depending on your host:
+
+### Docker (Coolify, Fly.io, Cloud Run, AWS, Render-Docker, Railway-Docker, k8s, …)
+
+The bundled multi-stage `Dockerfile` does the right thing — it installs
+devDependencies in the build stage, compiles to `lib/`, then ships a slim
+runtime image with only production deps.
+
+```bash
+docker build -t cribhub-api .
+docker run --rm -p 3000:3000 \
+  -e MONGODB_URL='mongodb://…' \
+  -e FEATHERS_SECRET="$(openssl rand -hex 32)" \
+  -e PORT=3000 \
+  cribhub-api
+```
+
+Required env vars (see `config/custom-environment-variables.json`):
+`PORT`, `HOSTNAME`, `MONGODB_URL`, `FEATHERS_SECRET`.
+
+### Nixpacks / Buildpacks (Coolify default, Render, Railway, Fly without Dockerfile)
+
+These hosts auto-detect the npm `build` script. The `package.json` defines:
+
+```json
+{
+  "scripts": {
+    "build":             "npm run compile",
+    "heroku-postbuild":  "npm run build",
+    "start":             "node lib/"
+  }
+}
+```
+
+So the deploy lifecycle becomes:
+
+1. `npm ci`  *(includes devDeps — typescript, ts-node, shx)*
+2. `npm run build` → produces `lib/`
+3. `NODE_ENV=production npm prune --omit=dev` *(optional, host-controlled)*
+4. `npm start` → runs `node lib/index.js`
+
+If your platform sets `NPM_CONFIG_PRODUCTION=true` **before** install (legacy
+Render, old Heroku stacks), devDependencies are skipped and `tsc` will not be
+available. Either:
+
+- unset `NPM_CONFIG_PRODUCTION` for the build phase, or
+- promote `typescript` and `shx` to `dependencies`, or
+- use the `Dockerfile` above (recommended).
+
+### Heroku (legacy)
+
+`heroku-postbuild` runs after install and before devDep pruning, so the same
+build pipeline works automatically — no extra config required.
+
+### Bare Linux host / systemd
+
+```bash
+git clone … && cd cribhubApi
+npm ci
+npm run build
+NODE_ENV=production PORT=3000 MONGODB_URL='mongodb://…' \
+  FEATHERS_SECRET="$(openssl rand -hex 32)" npm start
 ```
 
 ## Authentication

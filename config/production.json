@@ -1,0 +1,4 @@
+{
+  "comment": "Production overrides. All real values come from environment variables via config/custom-environment-variables.json (PORT, HOSTNAME, MONGODB_URL, FEATHERS_SECRET, …). Keeping this file present silences node-config's NODE_ENV=production strict-mode warning.",
+  "port": 3000
+}
