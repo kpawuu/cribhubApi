@@ -5,6 +5,13 @@ import { authenticateIfExternal } from '../../hooks/authenticate-if-external'
 import { requireRole } from '../../hooks/require-role'
 import { populateRoles } from '../../hooks/populate-roles'
 import { createUserNotification } from '../../utils/create-user-notification'
+import {
+  deriveSubstage,
+  loadDocumentsForRequest,
+  missingDocumentTypes,
+  REQUIRED_DOCUMENT_TYPES,
+  type RoleKind
+} from '../../utils/role-applications'
 
 import { RoleRequestsService, getOptions } from './role-requests.class'
 import {
@@ -121,18 +128,58 @@ const afterRoleRequestCreated = async (context: HookContext) => {
 }
 
 /**
- * after.patch: grant role on approval; notify the user in both cases.
+ * after.patch: grant role on approval; notify the user in both cases. Also
+ * keeps `substage` consistent with the new status and uploaded documents.
+ *
+ * When the recursive substage-recompute patch invokes this hook, it sets
+ * `skipSubstageRecompute` to short-circuit — otherwise the approval /
+ * rejection notification would fire twice (once for the real admin action,
+ * once for the internal substage adjustment).
  */
 const afterRoleRequestPatched = async (context: HookContext) => {
+  if ((context.params as any)?.skipSubstageRecompute) return context
   const patched = context.result as any
   if (!patched?.status) return context
 
-  // Grant the role when approved
+  // Grant the role when approved (idempotent: skip if already granted)
   if (patched.status === 'approved') {
-    await context.app.service('user-roles').create(
-      { userId: patched.userId, role: patched.role },
-      { provider: undefined } as any
-    )
+    const existing = (await (context.app as any).service('user-roles').find({
+      paginate: false,
+      query: { userId: patched.userId, role: patched.role },
+      provider: undefined
+    })) as any
+    const has = Array.isArray(existing) ? existing.length > 0 : (existing?.data?.length ?? 0) > 0
+    if (!has) {
+      await context.app.service('user-roles').create(
+        { userId: patched.userId, role: patched.role },
+        { provider: undefined } as any
+      )
+    }
+  }
+
+  // Recompute substage from the latest documents + status so the persisted
+  // value never drifts from reality.
+  try {
+    const docs = await loadDocumentsForRequest(context.app, String(patched._id))
+    const requestedExtras: string[] = Array.isArray(patched.requestedDocumentTypes) ? patched.requestedDocumentTypes : []
+    const nextSubstage = deriveSubstage({
+      status: patched.status,
+      role: patched.role as RoleKind,
+      uploadedDocumentTypes: docs.map((d) => d.documentType),
+      requestedExtras,
+      reviewerStartedAt: patched.reviewerStartedAt ?? null
+    })
+    if (nextSubstage !== patched.substage) {
+      await (context.app as any).service('role-requests').patch(
+        String(patched._id),
+        { substage: nextSubstage },
+        { provider: undefined, skipSubstageRecompute: true } as any
+      )
+      patched.substage = nextSubstage
+    }
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn('[role-requests] substage recompute failed', e)
   }
 
   const roleLabel = ROLE_LABEL[patched.role] || patched.role
@@ -182,6 +229,34 @@ const afterRoleRequestPatched = async (context: HookContext) => {
     })
   }
 
+  // If an admin patched in extra document requests, ping the applicant.
+  // We compare against `context.data.requestedDocumentTypes` (what the admin
+  // sent) rather than the resolved value to detect a real change vs. echo.
+  const sentReqDocs = (context.data as any)?.requestedDocumentTypes
+  if (
+    patched.status === 'pending' &&
+    Array.isArray(sentReqDocs) &&
+    sentReqDocs.length > 0 &&
+    !(context.params as any)?.skipSubstageRecompute
+  ) {
+    const missing = missingDocumentTypes(
+      patched.role as RoleKind,
+      [],
+      sentReqDocs as string[]
+    )
+    await createUserNotification(context.app, {
+      userId: patched.userId,
+      eventKey: 'role_request.document_requested',
+      category: 'roles',
+      title: `Action needed on your ${roleLabel} application`,
+      body: `Our reviewer needs ${missing.length} more document(s) before they can decide. Open your application to upload them.`,
+      linkUrl: '/applications/role-requests',
+      relatedService: 'role-requests',
+      relatedId: String(patched._id),
+      metadata: { requestedDocumentTypes: sentReqDocs }
+    })
+  }
+
   return context
 }
 
@@ -220,6 +295,23 @@ export const roleRequests = (app: Application) => {
         async (ctx: HookContext) => {
           const u = ctx.params.user as any
           ;(ctx.data as any).reviewedBy = u?._id?.toString()
+        },
+        async (ctx: HookContext) => {
+          // First time an admin touches a pending request, stamp
+          // `reviewerStartedAt` so the dashboard banner can advance from
+          // "submitted" to "reviewing".
+          if (!ctx.id) return ctx
+          try {
+            const existing = (await (ctx.app as any).service('role-requests').get(String(ctx.id), {
+              provider: undefined
+            } as any)) as any
+            if (existing && !existing.reviewerStartedAt && existing.status === 'pending') {
+              ;(ctx.data as any).reviewerStartedAt = new Date().toISOString()
+            }
+          } catch {
+            /* best effort */
+          }
+          return ctx
         }
       ],
 

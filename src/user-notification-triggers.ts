@@ -253,33 +253,9 @@ export function registerUserNotificationTriggers(app: Application): void {
     }
   })
 
-  app.service('role-requests').hooks({
-    after: {
-      patch: [
-        async (ctx: HookContext) => {
-          const st = (ctx.data as any)?.status
-          if (st !== 'approved' && st !== 'rejected') return ctx
-          const r = ctx.result as any
-          if (!r?.userId || !r?.status || r.status === 'pending') return ctx
-          await createUserNotification(app, {
-            userId: String(r.userId),
-            eventKey: `role_request.${r.status}`,
-            category: 'role',
-            title: r.status === 'approved' ? 'Role request approved' : 'Role request declined',
-            body:
-              r.status === 'approved'
-                ? `Your request for the “${r.role}” role was approved.`
-                : `Your request for the “${r.role}” role was declined.`,
-            linkUrl: `${appUrl()}/role-requests/${r._id}`,
-            relatedService: 'role-requests',
-            relatedId: String(r._id),
-            metadata: { role: r.role }
-          })
-          return ctx
-        }
-      ]
-    }
-  })
+  // NOTE: role-request approved/rejected notifications are fired from
+  // `src/services/role-requests/role-requests.ts` so they carry role-specific
+  // welcome copy and deep-links. Do not add a duplicate trigger here.
 
   app.service('agent-assignments').hooks({
     after: {

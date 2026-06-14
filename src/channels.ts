@@ -8,6 +8,7 @@ const SKIP_PUBLISH = new Set([
   'auth-management',
   'delete-account',
   'dashboard',
+  'my-role-applications',
   'ai'
 ])
 

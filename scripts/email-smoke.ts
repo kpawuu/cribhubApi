@@ -245,9 +245,10 @@ const EVENT_CASES: TemplateCase[] = [
   { key: 'agent_listing_request.recountered', category: 'requests', title: 'Agent sent a revised proposal',                body: 'They updated their commission to 7%.',                    linkUrl: '/landlord/properties/def456' },
   { key: 'agent_assignment.created',          category: 'assignments', title: 'You were assigned as agent for The Aster', body: 'A landlord assigned you directly without a request.',     linkUrl: '/agent/listings' },
   // Role-request lifecycle
-  { key: 'role_request.created',   category: 'roles', title: 'New verification request awaiting review',   body: 'Adjoa applied for the agent role.',                                       linkUrl: '/verification/role-requests' },
-  { key: 'role_request.approved',  category: 'roles', title: 'Your role request was approved',             body: 'Welcome — you can now access agent features.',                            linkUrl: '/agent/profile' },
-  { key: 'role_request.rejected',  category: 'roles', title: 'Your role request was not approved',         body: 'Please attach proof-of-ownership documents and resubmit.',                linkUrl: '/dashboard' },
+  { key: 'role_request.created',            category: 'roles', title: 'New verification request awaiting review', body: 'Adjoa applied for the agent role.',                                      linkUrl: '/verification/role-requests' },
+  { key: 'role_request.approved',           category: 'roles', title: 'Your role request was approved',            body: 'Welcome — you can now access agent features.',                           linkUrl: '/agent/profile' },
+  { key: 'role_request.rejected',           category: 'roles', title: 'Your role request was not approved',        body: 'Please attach proof-of-ownership documents and resubmit.',               linkUrl: '/dashboard' },
+  { key: 'role_request.document_requested', category: 'roles', title: 'Action needed on your Landlord application', body: 'Our reviewer needs your Proof of ownership and National ID to continue.', linkUrl: '/applications/role-requests', metadata: { requestedDocumentTypes: ['proof_of_ownership', 'national_id'] } },
   // Payouts
   { key: 'agent_payout.created', category: 'payouts', title: 'Commission scheduled', body: 'A commission for Lakeside Court was scheduled by the landlord.',  linkUrl: '/agent/payouts', metadata: { amount: 1850, currency: 'GHS' } },
   { key: 'agent_payout.paid',    category: 'payouts', title: 'Commission paid',      body: 'Your commission for Lakeside Court was marked as paid.',           linkUrl: '/agent/payouts', metadata: { amount: 1850, currency: 'GHS' } },

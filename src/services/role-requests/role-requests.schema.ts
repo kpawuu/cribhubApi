@@ -11,6 +11,26 @@ export const roleRequestSchema = Type.Object(
     userId: Type.String(),
     role: Type.Union([Type.Literal('landlord'), Type.Literal('property_manager'), Type.Literal('agent')]),
     status: Type.Union([Type.Literal('pending'), Type.Literal('approved'), Type.Literal('rejected')]),
+    /**
+     * Sub-stage within the application lifecycle. Derived from the top-level
+     * `status` plus uploaded documents and reviewer activity. Persisted so
+     * UI surfaces, notification copy, and admin filters agree on a single
+     * source of truth.
+     */
+    substage: Type.Optional(
+      Type.Union([
+        Type.Literal('submitted'),
+        Type.Literal('docs_required'),
+        Type.Literal('reviewing'),
+        Type.Literal('decided')
+      ])
+    ),
+    /** When the first admin opened the request (flips substage to `reviewing`). */
+    reviewerStartedAt: Type.Optional(Type.String({ format: 'date-time' })),
+    /** Promised decision-by date (createdAt + N business days). */
+    slaDueAt: Type.Optional(Type.String({ format: 'date-time' })),
+    /** Extra document types the reviewer asked the applicant to upload. */
+    requestedDocumentTypes: Type.Optional(Type.Array(Type.String())),
     /** Optional message / pitch from the applicant */
     message: Type.Optional(Type.String()),
     notes: Type.Optional(Type.String()),
@@ -115,7 +135,12 @@ export type RoleRequestData = Static<typeof roleRequestDataSchema>
 export const roleRequestDataValidator = getValidator(roleRequestDataSchema, dataValidator)
 export const roleRequestDataResolver = resolve<RoleRequest, HookContext>({
   status: async () => 'pending' as const,
-  createdAt: async () => new Date().toISOString()
+  substage: async () => 'submitted' as const,
+  createdAt: async () => new Date().toISOString(),
+  slaDueAt: async () => {
+    const { addBusinessDays, SLA_BUSINESS_DAYS } = await import('../../utils/role-applications')
+    return addBusinessDays(new Date(), SLA_BUSINESS_DAYS).toISOString()
+  }
 })
 
 export const roleRequestPatchSchema = Type.Partial(Type.Omit(roleRequestSchema, ['_id', 'userId', 'role', 'createdAt']), {

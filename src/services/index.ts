@@ -39,6 +39,7 @@ import { inquiries } from './inquiries/inquiries'
 import { chatMessages } from './chat-messages/chat-messages'
 import { favorites } from './favorites/favorites'
 import { dashboard } from './dashboard/dashboard'
+import { myRoleApplications } from './my-role-applications/my-role-applications'
 import { listingSidebar } from './listing-sidebar/listing-sidebar'
 import { userNotifications } from './user-notifications/user-notifications'
 import { adminBootstrap } from './admin-bootstrap/admin-bootstrap'
@@ -87,6 +88,7 @@ export const services = (app: Application) => {
   app.configure(favorites)
   app.configure(userNotifications)
   app.configure(dashboard)
+  app.configure(myRoleApplications)
   app.configure(listingSidebar)
   app.configure(adminBootstrap)
   app.configure(adminMigrations)

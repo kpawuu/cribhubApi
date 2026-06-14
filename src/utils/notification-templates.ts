@@ -30,6 +30,7 @@
  *   role_request.created
  *   role_request.approved
  *   role_request.rejected
+ *   role_request.document_requested
  *   agent_payout.created
  *   agent_payout.paid
  *   pm_payout.created
@@ -218,6 +219,15 @@ const templates: Record<string, NotificationTemplate> = {
     emailIntro: () => 'Please review the note from our team and resubmit when ready.',
     ctaLabel: () => 'Open dashboard',
     smsText: () => `${appName()}: Your role request was not approved. Sign in to review the details.`
+  },
+  'role_request.document_requested': {
+    emailSubject: () => `Action needed: upload documents — ${appName()}`,
+    emailHeading: () => 'Our reviewer needs a few more documents',
+    emailIntro: () =>
+      'Open your application to upload the requested documents. We will pick the review back up as soon as they are received.',
+    ctaLabel: () => 'Upload documents',
+    smsText: () =>
+      `${appName()}: Our reviewer needs more documents to finish your application. Open the app to upload them.`
   },
 
   // ── Payouts ────────────────────────────────────────────────────────────────
